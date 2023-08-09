@@ -1,0 +1,43 @@
+---
+import { Grid } from "@/components/Grid";
+import { getImage } from "astro:assets";
+import Layout from "../layouts/Layout.astro";
+import type { GridItem } from "@/api";
+import { getItems } from "../api";
+
+const items = await getItems();
+const itemsForGrid: GridItem[] = items.map(
+  (item) =>
+    ({
+      name: item.name,
+      slug: item.slug,
+      img: item.thumb.img,
+      style: item.thumb.style,
+    } satisfies GridItem)
+);
+
+const getIndexOgImage = async () => {
+  const img = (await import(`../assets/og-image.png`)).default;
+  const ogImage = await getImage({
+    src: img,
+    width: 1200,
+    height: 630,
+    quality: 60,
+    format: "png",
+  });
+  return ogImage;
+};
+const ogImage = await getIndexOgImage();
+---
+
+<Layout
+  title="Nothing But Photos"
+  bodyClass="overflow-hidden"
+  ogImage={ogImage.src}
+>
+  <main
+    class="m-6 small-landscape:m-6 sm:m-24 flex h-[calc(100dvh_-_3rem)] small-landscape:h-[calc(100dvh_-_3rem)] sm:h-[calc(100dvh_-_12rem)] overflow-hidden shadow-2xl rounded-2xl"
+  >
+    <Grid items={itemsForGrid} client:load />
+  </main>
+</Layout>
