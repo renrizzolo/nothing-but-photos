@@ -45,6 +45,14 @@ const { title, bodyClass, ogImage } = Astro.props;
     class={`text-stone-950 dark:text-stone-50 bg-white dark:bg-black ${bodyClass}`}
   >
     <slot />
+    <footer
+      class="flex justify-end text-xs text-stone-500 dark:text-stone-400 sm:-mt-12 -mt-11 p-6"
+    >
+      <p>
+        &copy; {new Date().getFullYear()}
+        <a href="https://renrizzolo.com">Ren Rizzolo</a>
+      </p>
+    </footer>
     <style is:global>
       .full-image img {
         view-transition-name: full-image;
