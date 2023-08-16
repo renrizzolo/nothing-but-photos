@@ -1,0 +1,76 @@
+---
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/700.css";
+
+import { NavLinks } from "@/components/NavLinks";
+import Info from "@/components/Info/Info.astro";
+import Layout from "../../layouts/Layout.astro";
+import { getItems } from "@/api";
+import type { Item } from "@/api";
+
+export const getStaticPaths = async () => {
+  const items = await getItems();
+
+  return Promise.all(
+    items.map((item, i) => ({
+      params: {
+        slug: item.slug,
+      },
+      props: {
+        item,
+        prev: items[i - 1],
+        next: items[i + 1],
+      },
+    }))
+  );
+};
+
+interface Props {
+  item: Item;
+  next?: Item;
+  prev?: Item;
+}
+
+const { slug } = Astro.params;
+const { item, next, prev } = Astro.props;
+---
+
+<Layout
+  title={`Nothing But Photos - ${item.name}`}
+  ogImage={`${item.ogImage.src}`}
+>
+  <div
+    class="full-image p-6 small-landscape:p-6 sm:p-24 flex flex-col max-h-screen max-w-[1550px] small-landscape:w-full"
+    style={{ aspectRatio: item.aspect }}
+  >
+    <nav class="flex -mx-2 sm:mx-0 pb-6">
+      <NavLinks
+        prev={prev?.slug}
+        next={next?.slug}
+        current={item.slug}
+        client:load
+      />
+    </nav>
+    <article>
+      <section class="pb-12">
+        <figure>
+          <Fragment set:html={item.large.style + item.large.img} />
+        </figure>
+      </section>
+      <section>
+        <div
+          transition:name="info"
+          class="grid grid-cols-2 lg:grid-cols-[repeat(4,_minmax(max-content,_1fr))] gap-6 pb-12"
+        >
+          <Info data={item.info} />
+        </div>
+        <div
+          transition:name="metadata"
+          class="grid grid-cols-2 lg:grid-cols-[repeat(4,_minmax(max-content,_1fr))] gap-6 pb-12"
+        >
+          <Info data={item.metadata} />
+        </div>
+      </section>
+    </article>
+  </div>
+</Layout>

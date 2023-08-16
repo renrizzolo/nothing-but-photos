@@ -1,25 +1,56 @@
 {
   "name": "nothing-but-photos",
-  "version": "0.1.0",
-  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "license": "MIT",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "generate-og-img": "node ./scripts/screenshot.mjs",
+    "og": "concurrently -k \"npm run dev\" \"npm run generate-og-img\" || exit 0",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "./src/assets/photos/*.jpg": [
+      "npm run og"
+    ]
   },
   "dependencies": {
-    "@types/node": "20.4.8",
-    "@types/react": "18.2.18",
-    "@types/react-dom": "18.2.7",
-    "autoprefixer": "10.4.14",
-    "eslint": "8.46.0",
-    "eslint-config-next": "13.4.13",
-    "next": "13.4.13",
-    "postcss": "8.4.27",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "tailwindcss": "3.3.3",
-    "typescript": "5.1.6"
+    "@astrojs/react": "^2.2.1",
+    "@astrojs/tailwind": "^4.0.0",
+    "@fontsource/inter": "^5.0.8",
+    "@nanostores/react": "^0.7.1",
+    "@react-spring/web": "^9.7.3",
+    "@use-gesture/react": "^10.2.27",
+    "astro": "^2.10.4",
+    "astro-imagetools": "^0.9.0",
+    "color": "^4.2.3",
+    "exif-reader": "^1.2.0",
+    "lodash.debounce": "^4.0.8",
+    "lodash.kebabcase": "^4.1.1",
+    "nanostores": "^0.9.3",
+    "react-use-measure": "^2.1.1",
+    "sharp": "^0.32.4",
+    "tailwindcss": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/exif-reader": "^1.0.0",
+    "@types/lodash.debounce": "^4.0.7",
+    "@types/lodash.kebabcase": "^4.1.7",
+    "@typescript-eslint/eslint-plugin": "^6.3.0",
+    "@typescript-eslint/parser": "^6.3.0",
+    "concurrently": "^8.2.0",
+    "eslint": "^8.46.0",
+    "eslint-plugin-react": "^7.33.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.3",
+    "puppeteer-core": "^21.0.3"
+  },
+  "overrides": {
+    "puppeteer-core": "^21.0.3"
   }
 }

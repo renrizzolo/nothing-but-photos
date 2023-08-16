@@ -1,0 +1,88 @@
+---
+import { ViewTransitions } from "astro:transitions";
+
+interface Props {
+  title: string;
+  bodyClass?: string;
+  ogImage?: string;
+}
+
+const url = import.meta.env.DEV
+  ? "http://localhost:3000"
+  : "https://luxury-yeot-f56b04.netlify.app";
+
+const { title, bodyClass, ogImage } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="description"
+      content="Travel and street photography, film and digital, photo gallery by Ren Rizzolo."
+    />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <slot name="head" />
+    <meta name="generator" content={Astro.generator} />
+    {
+      ogImage && (
+        <>
+          <meta name="og:image" content={`${url}${ogImage}`} />
+          <meta property="twitter:image" content={`${url}${ogImage}`} />
+        </>
+      )
+    }
+    <ViewTransitions />
+
+    <title>{title}</title>
+  </head>
+  <body
+    class={`text-stone-950 dark:text-stone-50 bg-white dark:bg-black ${bodyClass}`}
+  >
+    <slot />
+    <style is:global>
+      .full-image img {
+        view-transition-name: full-image;
+        contain: paint;
+      }
+
+      ::view-transition-old(full-image),
+      ::view-transition-new(full-image) {
+        /* animation-duration: 0s; */
+        /* Prevent the default animation,
+  so both views remain opacity:1 throughout the transition */
+        /* animation: none; */
+        /* Use normal blending,
+  so the new view sits on top and obscures the old view */
+        mix-blend-mode: normal;
+        /* Make the height the same as the group,
+  meaning the view size might not match its aspect-ratio. */
+        height: 100%;
+        /* Clip any overflow of the view */
+        overflow: clip;
+      }
+
+      /* The new view is the full image */
+      ::view-transition-new(full-image) {
+        animation: none;
+        /* Match the cover of the incoming thumb */
+        object-fit: cover;
+      }
+
+      /* The old view is the thumbnail */
+      ::view-transition-old(full-image) {
+        /* Match the containment of the outgoing full image */
+        object-fit: contain;
+      }
+
+      ::view-transition-image-pair(full-image) {
+        isolation: none;
+      }
+    </style>
+  </body>
+</html>

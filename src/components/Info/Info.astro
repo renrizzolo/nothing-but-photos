@@ -1,0 +1,22 @@
+---
+import Description from "@/components/Info/Description.astro";
+import Heading from "@/components/Info/Heading.astro";
+import type { Item } from "@/pages/index.astro";
+
+interface Props {
+  data: Item["metadata"] & Item["info"];
+}
+
+const { data } = Astro.props;
+---
+
+{
+  Object.entries(data).map(([k, v], i) =>
+    v ? (
+      <div class="flex flex-col text-xs gap-4">
+        <Heading>{k}</Heading>
+        <Description>{v}</Description>
+      </div>
+    ) : null
+  )
+}
