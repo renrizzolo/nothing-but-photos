@@ -61,7 +61,8 @@ async function main() {
       waitUntil: "load",
     });
     // need some extra delay for images to load
-    await new Promise((resolve) => setTimeout(() => resolve(), 500));
+    // -> need to wait for dev server to create responsive images :/
+    await new Promise((resolve) => setTimeout(() => resolve(), 3000));
 
     const buffer = await page.screenshot();
     fs.writeFileSync(`${imageDir}/og-image.png`, buffer);

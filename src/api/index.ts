@@ -18,7 +18,6 @@ export type Item = {
   ogImage: GetImageResult;
   large: ImgHTMLData;
   thumb: ImgHTMLData;
-  time: number;
   aspect: number;
   info: {
     Camera?: string;
@@ -30,6 +29,8 @@ export type Item = {
     ISO?: number | string;
     "Shutter Speed"?: string;
   };
+  // exif capture date OR file time
+  _captureDate: Date;
 };
 
 export type GridItem = {
@@ -99,7 +100,7 @@ export async function getItems(): Promise<Item[]> {
 
         const sh = sharp(`./src/assets/photos/${base}`);
         const meta = await sh.metadata();
-
+        // @TODO need a cacheing mechanism because this is really slow.
         // const { dominant } = await sh.stats();
         // const color = Color(dominant);
         // const [h, s, l] = color.hsl().array();
@@ -107,6 +108,9 @@ export async function getItems(): Promise<Item[]> {
           exif?: Record<string, string | number>;
         }
         const exif = meta.exif ? (exifReader(meta.exif) as Exif) : {};
+        // use the capture date, fall back to the modifty date (when film was scanned, probably)
+        const exifDate =
+          exif?.exif?.DateTimeOriginal ?? (exif?.image?.ModifyDate as number);
 
         const imageInfo: Item["info"] = {
           // Make: exif?.image?.Make,
@@ -114,8 +118,8 @@ export async function getItems(): Promise<Item[]> {
           Camera: exif?.image?.Make
             ? `${exif?.image?.Make} ${exif?.image?.Model}`
             : undefined,
-          "Capture Date": exif?.exif?.DateTimeOriginal
-            ? new Date(exif.exif.DateTimeOriginal).toLocaleDateString("en-GB", {
+          "Capture Date": exifDate
+            ? new Date(exifDate).toLocaleDateString("en-GB", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -132,17 +136,15 @@ export async function getItems(): Promise<Item[]> {
           "F Stop": exif?.exif?.FNumber,
           ISO: exif?.exif?.ISO,
           "Shutter Speed": exif?.exif?.ExposureTime
-            ? `1/${1 / Number(exif.exif.ExposureTime)}`
+            ? `1/${Math.round(1 / Number(exif.exif.ExposureTime))}`
             : undefined,
         };
 
         const makeModel = exif?.image?.Make
           ? `${exif?.image?.Make} ${exif?.image?.Model}`
           : "unknown camera";
-        const date = exif?.exif?.DateTimeOriginal
-          ? `${new Date(exif.exif.DateTimeOriginal).toLocaleDateString(
-              "en-GB"
-            )}`
+        const date = exifDate
+          ? `${new Date(exifDate).toLocaleDateString("en-GB")}`
           : "unknown date";
         const alt = `Photograph taken with ${makeModel} on ${date}`;
 
@@ -190,16 +192,22 @@ export async function getItems(): Promise<Item[]> {
           thumb: thumbOpt,
           name,
           slug: kebabCase(name.toLowerCase()),
-          time,
           aspect,
           ogImage,
           info: imageInfo,
           metadata: imageMeta,
+          _captureDate: new Date(exifDate ?? time),
         } satisfies Item;
         return item;
       })
     );
-    return files.sort((a, b) => a.time - b.time);
+    return files
+      .sort((a, b) => Number(b._captureDate) - Number(a._captureDate))
+      .sort(
+        (a, b) =>
+          // put the photos without exif capture date to the back
+          Number(!!b.info["Capture Date"]) - Number(!!a.info["Capture Date"])
+      );
   } catch (error) {
     throw new Error(`${error}
 		could not find any photos in ./src/assets/**.*`);
