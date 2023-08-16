@@ -11,6 +11,11 @@ export default defineConfig({
     assets: true,
     viewTransitions: true,
   },
+  vite: {
+    optimizeDeps: {
+      exclude: ["astro-imagetools"],
+    },
+  },
   image: {
     service: sharpImageService(),
   },
