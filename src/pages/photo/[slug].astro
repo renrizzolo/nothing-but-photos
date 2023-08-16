@@ -57,16 +57,16 @@ const { item, next, prev } = Astro.props;
           <Fragment set:html={item.large.style + item.large.img} />
         </figure>
       </section>
-      <section>
+      <section class="pb-12">
         <div
           transition:name="info"
-          class="grid grid-cols-2 lg:grid-cols-[repeat(4,_minmax(max-content,_1fr))] gap-6 pb-12"
+          class="grid grid-cols-2 lg:grid-cols-[repeat(4,_1fr))] gap-6 pb-12"
         >
           <Info data={item.info} />
         </div>
         <div
           transition:name="metadata"
-          class="grid grid-cols-2 lg:grid-cols-[repeat(4,_minmax(max-content,_1fr))] gap-6 pb-12"
+          class="grid grid-cols-2 lg:grid-cols-[repeat(4,_1fr))] gap-6 pb-12"
         >
           <Info data={item.metadata} />
         </div>

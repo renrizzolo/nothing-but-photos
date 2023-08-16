@@ -397,7 +397,9 @@ const GridThumb = React.memo(
       <a
         className={`${
           active ? "full-image" : ""
-        } grid-thumb hover:opacity-80 transition-all relative outline-none focus:z-10 focus:ring-white focus:ring-2`}
+        } grid-thumb hover:opacity-80 transition-all relative outline-none 
+        focus:z-10 focus:ring-[rgba(0,0,0,0.66)] focus:ring-offset-2 focus:rounded-sm 
+        focus:overflow-hidden focus:ring-offset-white focus:ring-4`}
         href={`/photo/${slug}/`}
         onPointerDown={(e) => {
           e.preventDefault();
