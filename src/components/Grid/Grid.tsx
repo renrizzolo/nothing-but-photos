@@ -103,7 +103,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     const cw = window.innerWidth - margin;
     const ch = window.innerHeight - margin;
 
-    const thumbSize = Math.round(cw > 640 ? cw / 8 : cw / 4);
+    const thumbSize = cw > 640 ? cw / 8 : cw / 4;
     thumbSizeRef.current = thumbSize;
 
     // make horizontal plane 1.5x greater than the container width
@@ -330,7 +330,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
               {allItems.map((item, i) => (
                 <GridThumb
                   key={i}
-                  html={frameIndex === 1 ? item.style + item.img : item.img}
+                  html={frameIndex === 0 ? item.style + item.img : item.img}
                   name={item.name}
                   slug={item.slug}
                   id={`${item.slug}-${i}-${frameIndex}`}
