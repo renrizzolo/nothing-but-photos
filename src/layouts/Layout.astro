@@ -1,4 +1,8 @@
 ---
+import "@fontsource/inter/latin-400.css";
+import "@fontsource/inter/latin-700.css";
+import Footer from "@/components/Footer/Footer.astro";
+import Header from "@/components/Header/Header.astro";
 import { ViewTransitions } from "astro:transitions";
 
 interface Props {
@@ -44,16 +48,15 @@ const { title, bodyClass, ogImage } = Astro.props;
   <body
     class={`text-stone-950 dark:text-stone-50 bg-white dark:bg-black ${bodyClass}`}
   >
-    <slot />
-    <footer
-      class="flex justify-end text-xs text-stone-500 dark:text-stone-400 sm:-mt-12 -mt-11 p-6"
-    >
-      <p>
-        &copy; {new Date().getFullYear()}
-        <a href="https://renrizzolo.com">Ren Rizzolo</a>
-      </p>
-    </footer>
+    <main>
+      <Header />
+      <slot />
+      <Footer />
+    </main>
     <style is:global>
+      @tailwind base;
+      @tailwind utilities;
+
       .full-image img {
         view-transition-name: full-image;
         contain: paint;

@@ -176,6 +176,7 @@ export async function getItems(): Promise<Item[]> {
           rotate: getRotationFromOrientation(meta.orientation || 0),
           layout: "fill",
           objectFit: "cover",
+          quality: 65,
           loading: "auto",
           aspect: 1,
           sizes: `(min-width: 2560px) 296px,

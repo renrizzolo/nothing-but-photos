@@ -6,7 +6,13 @@ import tailwind from "@astrojs/tailwind";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [astroImageTools, react(), tailwind()],
+  integrations: [
+    astroImageTools,
+    react(),
+    tailwind({
+      applyBaseStyles: false,
+    }),
+  ],
   experimental: {
     assets: true,
     viewTransitions: true,
