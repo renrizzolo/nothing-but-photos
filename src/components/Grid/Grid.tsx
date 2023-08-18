@@ -52,29 +52,39 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
 
   const animateToItem = React.useCallback(
     (el?: HTMLElement) => {
-      if (el) {
-        const { x, y } = el?.getBoundingClientRect?.() || {};
-        const offsetX = (window.innerWidth - containerWidth) / 2;
-        const offsetY = (window.innerHeight - containerHeight) / 2;
+      return new Promise((resolve) => {
+        if (el) {
+          const { x, y } = el?.getBoundingClientRect?.() || {};
+          const offsetX = (window.innerWidth - containerWidth) / 2;
+          const offsetY = (window.innerHeight - containerHeight) / 2;
 
-        api.start({
-          x: initialCoords[0] + -x + offsetX,
-          y: initialCoords[1] + -y + offsetY,
-          config: { tension: 100 },
-        });
-      }
+          api.start({
+            to: async (next) => {
+              await next({
+                x: initialCoords[0] + -x + offsetX,
+                y: initialCoords[1] + -y + offsetY,
+              });
+            },
+            onRest: resolve,
+          });
+        }
+      });
     },
     [api, containerHeight, containerWidth, initialCoords]
   );
 
-  const focusItem = React.useCallback(() => {
+  const focusItem = React.useCallback(async () => {
     let el = document.querySelector<HTMLElement>(
       `[data-slug="${$activeId.get()}"]`
     );
     if (el) {
       // when we have the item name but not the full id, animate
       // into view the first occurence of that item
-      animateToItem(el);
+
+      // await the animation so focus() doesn't
+      // cause the browser to scroll the container to the element
+      // when it's out of view
+      await animateToItem(el);
     } else {
       el = document.getElementById($activeId.get() ?? "");
     }
@@ -86,6 +96,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   }, [focusItem]);
 
   React.useEffect(() => {
+    // this happes too late, but astro:beforeload is too early
     document.addEventListener("astro:load", onLoad, { once: true });
     return () => document.removeEventListener("astro:load", onLoad);
   }, [onLoad]);
@@ -149,6 +160,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
 
   const cleanup = React.useCallback(() => {
     resizeRef.current?.disconnect();
+    document.removeEventListener("astro:load", onLoad);
   }, []);
 
   // clone items if they don't fill a screen
