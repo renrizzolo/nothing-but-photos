@@ -1,12 +1,10 @@
 ---
-import "@fontsource/inter/400.css";
-import "@fontsource/inter/700.css";
-
-import { NavLinks } from "@/components/NavLinks";
-import Info from "@/components/Info/Info.astro";
-import Layout from "../../layouts/Layout.astro";
-import { getItems } from "@/api";
 import type { Item } from "@/api";
+import { getItems } from "@/api";
+import Info from "@/components/Info/Info.astro";
+import { NavLinks } from "@/components/NavLinks";
+import { SITE_NAME } from "@/constants";
+import Layout from "@/layouts/Layout.astro";
 
 export const getStaticPaths = async () => {
   const items = await getItems();
@@ -35,15 +33,15 @@ const { slug } = Astro.params;
 const { item, next, prev } = Astro.props;
 ---
 
-<Layout
-  title={`Nothing But Photos - ${item.name}`}
-  ogImage={`${item.ogImage.src}`}
->
+<Layout title={`${SITE_NAME} - ${item.name}`} ogImage={`${item.ogImage.src}`}>
   <div
-    class="full-image p-6 small-landscape:p-6 sm:p-24 flex flex-col max-h-screen max-w-[1550px] small-landscape:w-full"
+    class="full-image p-8 small-landscape:p-8 sm:p-24 flex flex-col max-h-screen max-w-[1550px] small-landscape:w-full"
     style={{ aspectRatio: item.aspect }}
   >
-    <nav class="flex -mx-2 sm:mx-0 pb-6">
+    <nav
+      aria-label="Site navigation"
+      class="flex sm:mx-0 pb-3 sm:pb-6 small-landscape:pb-6"
+    >
       <NavLinks
         prev={prev?.slug}
         next={next?.slug}
@@ -58,18 +56,18 @@ const { item, next, prev } = Astro.props;
         </figure>
       </section>
       <section class="pb-12">
-        <div
+        <dl
           transition:name="info"
           class="grid grid-cols-2 lg:grid-cols-[repeat(4,_1fr))] gap-6 pb-12"
         >
           <Info data={item.info} />
-        </div>
-        <div
+        </dl>
+        <dl
           transition:name="metadata"
           class="grid grid-cols-2 lg:grid-cols-[repeat(4,_1fr))] gap-6 pb-12"
         >
           <Info data={item.metadata} />
-        </div>
+        </dl>
       </section>
     </article>
   </div>

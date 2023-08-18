@@ -1,4 +1,4 @@
-"use client";
+import "./grid.css";
 import type { GridItem } from "@/api";
 import { a, useInView, useSpring } from "@react-spring/web";
 import { useGesture } from "@use-gesture/react";
@@ -26,7 +26,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   const thumbSizeRef = React.useRef(0);
 
   const frameCount = 4;
-  const springs = Array.from({ length: frameCount });
+  const clones = Array.from({ length: frameCount });
 
   const [spring, api] = useSpring(() => ({
     x: initialCoords[0] || 0,
@@ -94,16 +94,19 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     // container margin is 12rem (3rem below sm breakpoint)
     const rem = 16;
 
-    let margin = window.innerWidth < 640 ? 3 * rem : 12 * rem;
+    let margin = window.innerWidth < 640 ? 4 * rem : 12 * rem;
     // portrait: (max-height: 480px) and (max-width: 960px)
     if (window.innerHeight < 480 && window.innerWidth < 960) {
-      margin = 3 * rem;
+      margin = 4 * rem;
     }
 
     const cw = window.innerWidth - margin;
     const ch = window.innerHeight - margin;
+    let thumbSize = cw > 640 ? cw / 8 : cw / 4;
+    if (window.innerHeight < 480 && window.innerWidth < 960) {
+      thumbSize = cw / 6;
+    }
 
-    const thumbSize = cw > 640 ? cw / 8 : cw / 4;
     thumbSizeRef.current = thumbSize;
 
     // make horizontal plane 1.5x greater than the container width
@@ -320,7 +323,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
             y: spring.y,
           }}
         >
-          {springs.map((_, frameIndex) => (
+          {clones.map((_, frameIndex) => (
             <GridContainer
               columns={columns}
               thumbSize={thumbSize}
@@ -329,7 +332,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
             >
               {allItems.map((item, i) => (
                 <GridThumb
-                  key={i}
+                  key={`${item.slug}-${i}-${frameIndex}`}
                   html={frameIndex === 0 ? item.style + item.img : item.img}
                   name={item.name}
                   slug={item.slug}
@@ -395,11 +398,7 @@ const GridThumb = React.memo(
   }) => {
     return (
       <a
-        className={`${
-          active ? "full-image" : ""
-        } grid-thumb hover:opacity-80 transition-all relative outline-none 
-        focus:z-10 focus:ring-[rgba(0,0,0,0.66)] focus:ring-offset-2 focus:rounded-sm 
-        focus:overflow-hidden focus:ring-offset-white focus:ring-4`}
+        className={`${active ? "full-image" : ""} grid-item-anchor`}
         href={`/photo/${slug}/`}
         onPointerDown={(e) => {
           e.preventDefault();

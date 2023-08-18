@@ -1,9 +1,10 @@
 ---
 import { Grid } from "@/components/Grid";
 import { getImage } from "astro:assets";
-import Layout from "../layouts/Layout.astro";
+import Layout from "@/layouts/Layout.astro";
 import type { GridItem } from "@/api";
-import { getItems } from "../api";
+import { getItems } from "@/api";
+import { SITE_NAME } from "@/constants";
 
 const items = await getItems();
 const itemsForGrid: GridItem[] = items.map(
@@ -30,14 +31,10 @@ const getIndexOgImage = async () => {
 const ogImage = await getIndexOgImage();
 ---
 
-<Layout
-  title="Nothing But Photos"
-  bodyClass="overflow-hidden"
-  ogImage={ogImage.src}
->
-  <main
-    class="m-6 small-landscape:m-6 sm:m-24 flex h-[calc(100dvh_-_3rem)] small-landscape:h-[calc(100dvh_-_3rem)] sm:h-[calc(100dvh_-_12rem)] overflow-hidden shadow-2xl rounded-2xl"
+<Layout title={SITE_NAME} bodyClass="overflow-hidden" ogImage={ogImage.src}>
+  <section
+    class="m-8 small-landscape:m-8 sm:m-24 flex h-[calc(100dvh_-_4rem)] small-landscape:h-[calc(100dvh_-_4rem)] sm:h-[calc(100dvh_-_12rem)] overflow-hidden shadow-lg small-landscape:shadow-lg sm:shadow-2xl rounded-2xl"
   >
     <Grid items={itemsForGrid} client:load />
-  </main>
+  </section>
 </Layout>

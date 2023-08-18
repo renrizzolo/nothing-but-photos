@@ -7,7 +7,7 @@ const Link = ({
 }: React.PropsWithChildren<{ href: string; onClick?: () => void }>) => (
   <a
     {...rest}
-    className="select-none px-3 py-1.5 inline-flex rounded-sm text-sm transition-colors self-start hover:bg-stone-100 dark:hover:bg-stone-800"
+    className="select-none py-1 inline-flex rounded-sm text-sm transition-colors self-start border-b border-b-transparent hover:text-stone-400 dark:hover:bg-stone-800"
   >
     {children}
   </a>
@@ -72,7 +72,7 @@ export const NavLinks = ({
       <Link href="/" data-back onClick={() => handleCleanup(false)}>
         Return
       </Link>
-      <div className="ml-auto flex gap-2">
+      <div className="ml-auto flex gap-4">
         {prev && (
           <Link
             href={`/photo/${prev}/`}
