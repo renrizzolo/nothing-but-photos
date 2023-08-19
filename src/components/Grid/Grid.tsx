@@ -1,5 +1,5 @@
-import "./grid.css";
 import type { GridItem } from "@/api";
+import type { Controller, OnChange, SpringValue } from "@react-spring/web";
 import { a, useInView, useSpring } from "@react-spring/web";
 import { useGesture } from "@use-gesture/react";
 import debounce from "lodash.debounce";
@@ -9,10 +9,13 @@ import {
   initialCoords as $initialCoords,
 } from "./gridStore";
 
-function calcDiff(size: number, thumbSize: number) {
-  const count = size / thumbSize;
-  return Math.ceil(count);
-}
+import "./grid.css";
+
+type SpringVal = { x: number; y: number };
+
+// there are 4 clones in a 2x2 grid
+const frameCount = 4;
+const clones = Array.from({ length: frameCount });
 
 export const Grid = ({ items }: { items: GridItem[] }) => {
   const rootRef = React.useRef<HTMLDivElement>(null);
@@ -25,10 +28,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   const gridRef = React.useRef(null);
   const thumbSizeRef = React.useRef(0);
 
-  const frameCount = 4;
-  const clones = Array.from({ length: frameCount });
-
-  const [spring, api] = useSpring(() => ({
+  const [spring, api] = useSpring<SpringVal>(() => ({
     x: initialCoords[0] || 0,
     y: initialCoords[1] || 0,
   }));
@@ -121,8 +121,8 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     thumbSizeRef.current = thumbSize;
 
     // make horizontal plane 1.5x greater than the container width
-    const colCount = calcDiff(cw * 1.5, thumbSize);
-    const rowCount = calcDiff(ch, thumbSize);
+    const colCount = Math.ceil((cw * 1.5) / thumbSize);
+    const rowCount = Math.ceil(ch / thumbSize);
 
     const height = rowCount * thumbSize;
     const width = colCount * thumbSize;
@@ -182,6 +182,78 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     return i1;
   }, [columns, items, itemsCount, rows]);
 
+  const onDragEnd: (
+    decayX: number,
+    decayY: number,
+    dy: number,
+    dx: number,
+    isNested: boolean,
+    didExceedY: boolean,
+    didExceedX: boolean
+  ) => OnChange<SpringValue<SpringVal>, Controller<SpringVal>> =
+    React.useCallback(
+      (decayX, decayY, dy, dx, isNested, didExceedY, didExceedX) => {
+        return ({ value: { x: xVal, y: yVal } }) => {
+          const exceedsY = dy < 0 ? yVal % height > 0 : yVal < -height;
+          const exceedsX = dx < 0 ? xVal % width > 0 : xVal < -width;
+
+          if (exceedsY || exceedsX) {
+            const xFlip = dx > 0 ? 0 : -width;
+            const yFlip = dy > 0 ? 0 : -height;
+            const remainderY = dy < 0 ? decayY - height : decayY - -height;
+            const remainderX = dx < 0 ? decayX - width : decayX - -width;
+            // immediately flip to the opposite side if we have exceeded the
+            // frame boundary in this animation frame
+            api.set({
+              x: exceedsX ? xFlip : xVal,
+              y: exceedsY ? yFlip : yVal,
+            });
+            // start a new animation to avoid throwing an error
+            // for interrupting the current one
+            api.start({
+              to: async (nxt) => {
+                await nxt({
+                  y:
+                    exceedsY || didExceedY
+                      ? remainderY
+                      : isNested
+                      ? yVal
+                      : decayY,
+                  x:
+                    exceedsX || didExceedX
+                      ? remainderX
+                      : isNested
+                      ? xVal
+                      : decayX,
+                  // If we don't recursively check for exceeding the boundary,
+                  // it's possible to have a decay that e.g exceeds Y boundary initally,
+                  // but then exceeds X boundary *in this nested animation*
+
+                  // we recurse 1 level only as MAX_DECAY
+                  // will never allow exceeding more than 1 frame boundary
+                  onChange: isNested
+                    ? undefined
+                    : onDragEnd(
+                        decayX,
+                        decayY,
+                        dy,
+                        dx,
+                        true,
+                        exceedsY,
+                        exceedsX
+                      ),
+                });
+              },
+            });
+          }
+        };
+      },
+      [api, height, width]
+    );
+
+  const MAX_DECAY_X = containerWidth / 2;
+  const MAX_DECAY_Y = containerHeight / 2;
+
   const runSpring = React.useCallback(
     ({
       x,
@@ -205,48 +277,27 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
 
       api.start({
         to: async (next) => {
-          const distanceToNextItemX =
-            (Math.abs(xPos / thumbSize) -
-              Math.floor(Math.abs(xPos / thumbSize))) *
-            thumbSize;
-
-          const distanceToNextItemY =
-            (Math.abs(yPos / thumbSize) -
-              Math.floor(Math.abs(yPos / thumbSize))) *
-            thumbSize;
-
-          const xWithVelocity =
-            dx < 0
-              ? xPos + Math.min(distanceToNextItemX * vx, containerWidth / 2)
-              : xPos +
-                Math.max(-distanceToNextItemX * vx, -(containerWidth / 2));
-
-          const yWithVelocity =
-            dy < 0
-              ? yPos + Math.min(distanceToNextItemY * vy, containerHeight / 2)
-              : yPos +
-                Math.max(-distanceToNextItemY * vy, -(containerHeight / 2));
-
-          if (!down) {
-            // this will do.
-            const immX =
-              dx < 0 ? xWithVelocity % width > 0 : xWithVelocity < -width;
-            const immY =
-              dy < 0 ? yWithVelocity % height > 0 : yWithVelocity < -height;
+          if (down) {
             await next({
-              x: immX ? xPos : xWithVelocity % width,
-              y: immY ? yPos : yWithVelocity % height,
-              immediate: immX,
+              x: xPos,
+              y: yPos,
+              immediate: true,
+            });
+          }
+
+          // when letting go of the drag, use the velocity to create some decay animation
+          if (!down) {
+            const decayX = xPos + Math.min(thumbSize * vx, MAX_DECAY_X) * -dx;
+            const decayY = yPos + Math.min(thumbSize * vy, MAX_DECAY_Y) * -dy;
+
+            await next({
+              x: decayX,
+              y: decayY,
+              onChange: onDragEnd(decayX, decayY, dy, dx, false, false, false),
             });
 
             return;
           }
-
-          await next({
-            x: xPos,
-            y: yPos,
-            immediate: down,
-          });
         },
 
         config: {
@@ -255,7 +306,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
         },
       });
     },
-    [width, height, api, thumbSize, containerWidth, containerHeight]
+    [width, height, api, thumbSize, MAX_DECAY_X, MAX_DECAY_Y, onDragEnd]
   );
 
   useGesture(
