@@ -102,21 +102,8 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   }, [onLoad]);
 
   const updateGrid = React.useCallback(() => {
-    // container margin is 12rem (3rem below sm breakpoint)
-    const rem = 16;
-
-    let margin = window.innerWidth < 640 ? 4 * rem : 12 * rem;
-    // portrait: (max-height: 480px) and (max-width: 960px)
-    if (window.innerHeight < 480 && window.innerWidth < 960) {
-      margin = 4 * rem;
-    }
-
-    const cw = window.innerWidth - margin;
-    const ch = window.innerHeight - margin;
-    let thumbSize = cw > 640 ? cw / 8 : cw / 4;
-    if (window.innerHeight < 480 && window.innerWidth < 960) {
-      thumbSize = cw / 6;
-    }
+    const [cw, ch] = getContainerSize();
+    const thumbSize = getThumbSize(cw);
 
     thumbSizeRef.current = thumbSize;
 
@@ -373,10 +360,12 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     <div ref={rootRef} className="w-full h-full">
       <div
         ref={gridRef}
+        data-testid="grid-drag"
         className={`relative w-full h-full overflow-hidden touch-none`}
       >
         <a.div
-          className="w-full h-full grid-drag-component grid will-change-transform select-none"
+          data-testid="grid-animatable"
+          className="w-full h-full grid will-change-transform select-none"
           style={{
             gridTemplateColumns: `repeat(${frameCount / 2}, ${width}px)`,
             gridTemplateRows: `repeat(${frameCount / 2}, ${height}px)`,
@@ -392,6 +381,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
               thumbSize={thumbSize}
               root={rootRef as unknown as React.MutableRefObject<HTMLElement>}
               key={frameIndex}
+              index={frameIndex}
             >
               {allItems.map((item, i) => (
                 <GridThumb
@@ -416,11 +406,13 @@ const GridContainer = ({
   children,
   columns,
   root,
+  index,
   thumbSize,
 }: React.PropsWithChildren<{
   columns: number;
   thumbSize: number;
   root: React.MutableRefObject<HTMLElement>;
+  index: number;
 }>) => {
   const [ref, isInView] = useInView({
     rootMargin: `20%`,
@@ -431,6 +423,7 @@ const GridContainer = ({
   return (
     <a.div
       ref={ref}
+      data-testid={`grid-container-${index}`}
       className="h-full grid w-full"
       style={{
         // @ts-expect-error - not in csstype
@@ -466,6 +459,7 @@ const GridThumb = React.memo(
         onPointerDown={(e) => {
           e.preventDefault();
         }}
+        data-testid={id}
         id={id}
         data-slug={slug}
         onClick={onNavigate(id)}
@@ -476,3 +470,37 @@ const GridThumb = React.memo(
 );
 
 GridThumb.displayName = "GridThumb";
+
+/**
+ * Get the thumbnail size to display
+ * based on the current window width/height
+ *
+ * The value is a division of the containerWidth
+ * so that the thumbs are flush with the edge of the grid
+ */
+export const getThumbSize = (containerWidth: number) => {
+  let thumbSize =
+    containerWidth > 640 ? containerWidth / 8 : containerWidth / 4;
+  if (window.innerHeight < 480 && window.innerWidth < 960) {
+    thumbSize = containerWidth / 6;
+  }
+  return thumbSize;
+};
+
+/**
+ * Get the container size based on the current window width/height
+ */
+export const getContainerSize = () => {
+  // container margin is 12rem (3rem below sm breakpoint)
+  const rem = 16;
+
+  let margin = window.innerWidth < 640 ? 4 * rem : 12 * rem;
+  // portrait: (max-height: 480px) and (max-width: 960px)
+  if (window.innerHeight < 480 && window.innerWidth < 960) {
+    margin = 4 * rem;
+  }
+
+  const cw = window.innerWidth - margin;
+  const ch = window.innerHeight - margin;
+  return [cw, ch];
+};
