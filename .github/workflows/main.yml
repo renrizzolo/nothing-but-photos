@@ -1,0 +1,18 @@
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18.x]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node ${{ matrix.node }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm test
