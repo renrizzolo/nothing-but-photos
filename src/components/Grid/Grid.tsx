@@ -124,18 +124,28 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     });
   }, []);
 
-  const debouncedUpdateGrid = React.useCallback(debounce(updateGrid, 300), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedUpdateGrid = React.useCallback(debounce(updateGrid, 300), [
+    updateGrid,
+  ]);
 
-  React.useEffect(() => {
+  const isUpdateRef = React.useRef(false);
+
+  React.useLayoutEffect(() => {
     updateGrid();
-  }, []);
+  }, [updateGrid]);
 
   const resizeRef = React.useRef<ResizeObserver>();
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (rootRef.current && !resizeRef.current) {
       resizeRef.current = new ResizeObserver((entries) => {
         for (const entry of entries) {
+          // just to prevent firing update twice on mount
+          if (!isUpdateRef.current) {
+            isUpdateRef.current = true;
+            return;
+          }
           if (entry.contentBoxSize) {
             debouncedUpdateGrid();
           }
@@ -148,6 +158,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   const cleanup = React.useCallback(() => {
     resizeRef.current?.disconnect();
     document.removeEventListener("astro:load", onLoad);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // clone items if they don't fill a screen
