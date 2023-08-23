@@ -1,6 +1,8 @@
 # Nothing But Photos
-
+###
 A minimal photo gallery with an infinite x/y draggable photo grid.
+
+https://nothingbut.photos
 
 Built with
 
@@ -9,6 +11,7 @@ Built with
 - @react-spring/web
 - @use-gesture/react
 
+---
 ## Astro
 
 Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
