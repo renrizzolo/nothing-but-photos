@@ -374,40 +374,46 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
         data-testid="grid-drag"
         className={`relative w-full h-full overflow-hidden touch-none`}
       >
-        <a.div
-          data-testid="grid-animatable"
-          className="w-full h-full grid will-change-transform select-none"
-          style={{
-            gridTemplateColumns: `repeat(${frameCount / 2}, ${width}px)`,
-            gridTemplateRows: `repeat(${frameCount / 2}, ${height}px)`,
-            // @ts-expect-error - not in csstype
-            WebkitUserDrag: "none",
-            x: spring.x,
-            y: spring.y,
-          }}
-        >
-          {clones.map((_, frameIndex) => (
-            <GridContainer
-              columns={columns}
-              thumbSize={thumbSize}
-              root={rootRef as unknown as React.MutableRefObject<HTMLElement>}
-              key={frameIndex}
-              index={frameIndex}
-            >
-              {allItems.map((item, i) => (
-                <GridThumb
-                  key={`${item.slug}-${i}-${frameIndex}`}
-                  html={frameIndex === 0 ? item.style + item.img : item.img}
-                  name={item.name}
-                  slug={item.slug}
-                  id={`${item.slug}-${i}-${frameIndex}`}
-                  active={$activeId.get() === `${item.slug}-${i}-${frameIndex}`}
-                  onNavigate={onNavigate}
-                />
-              ))}
-            </GridContainer>
-          ))}
-        </a.div>
+        {thumbSize ? (
+          <a.div
+            data-testid="grid-animatable"
+            className="w-full h-full grid will-change-transform select-none"
+            style={{
+              gridTemplateColumns: `repeat(${frameCount / 2}, ${width}px)`,
+              gridTemplateRows: `repeat(${frameCount / 2}, ${height}px)`,
+              // @ts-expect-error - not in csstype
+              WebkitUserDrag: "none",
+              x: spring.x,
+              y: spring.y,
+            }}
+          >
+            {clones.map((_, frameIndex) => (
+              <GridContainer
+                columns={columns}
+                thumbSize={thumbSize}
+                root={rootRef as unknown as React.MutableRefObject<HTMLElement>}
+                key={frameIndex}
+                index={frameIndex}
+              >
+                {allItems.map((item, i) => (
+                  <GridThumb
+                    key={`${item.slug}-${i}-${frameIndex}`}
+                    html={frameIndex === 0 ? item.style + item.img : item.img}
+                    name={item.name}
+                    slug={item.slug}
+                    id={`${item.slug}-${i}-${frameIndex}`}
+                    active={
+                      $activeId.get() === `${item.slug}-${i}-${frameIndex}`
+                    }
+                    onNavigate={onNavigate}
+                  />
+                ))}
+              </GridContainer>
+            ))}
+          </a.div>
+        ) : (
+          <LoadingIndicator />
+        )}
       </div>
     </div>
   );
@@ -481,6 +487,31 @@ const GridThumb = React.memo(
 );
 
 GridThumb.displayName = "GridThumb";
+
+const CIRCLE_SIZE = 50;
+const LoadingIndicator = () => (
+  <div className="flex items-center justify-center w-full h-full text-stone-200 dark:text-stone-800">
+    <svg
+      width={CIRCLE_SIZE}
+      height={CIRCLE_SIZE}
+      className="fill-current animate-ping"
+    >
+      <circle cx={CIRCLE_SIZE / 2} cy={CIRCLE_SIZE / 2} r={CIRCLE_SIZE / 2} />
+      <circle
+        className="stroke-stone-100 dark:stroke-stone-600"
+        cx={CIRCLE_SIZE / 2}
+        cy={CIRCLE_SIZE / 2}
+        r={20}
+      />
+      <circle
+        className="fill-stone-100 dark:fill-stone-600"
+        cx={CIRCLE_SIZE / 2}
+        cy={CIRCLE_SIZE / 2}
+        r={10}
+      />
+    </svg>
+  </div>
+);
 
 /**
  * Get the thumbnail size to display

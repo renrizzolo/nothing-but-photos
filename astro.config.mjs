@@ -22,6 +22,9 @@ export default defineConfig({
       exclude: ["astro-imagetools"],
     },
   },
+  build: {
+    inlineStylesheets: "auto",
+  },
   image: {
     service: sharpImageService(),
   },
