@@ -7,6 +7,29 @@ import { getItems } from "@/api";
 import { SITE_NAME } from "@/constants";
 
 const items = await getItems();
+
+// extract the attributes from the img html.
+// astro-imagetools doesn't give us a way to get this directly.
+// it does have a `preload` option but it's missing fetchpriority.
+const regex = /(\w+)(?:\s*=\s*(?:"([^"]*)"|(\S+)))/g;
+
+function getAttributes(html: string) {
+  const attributes: Record<string, string> = {};
+  let matches = regex.exec(html);
+
+  while (matches !== null) {
+    const key = matches[1];
+    const value = matches[2] || matches[3];
+    attributes[key] = value;
+
+    matches = regex.exec(html);
+  }
+
+  return attributes;
+}
+
+const preload = getAttributes(items[0]?.thumb.img);
+
 const itemsForGrid: GridItem[] = items.map(
   (item) =>
     ({
@@ -28,10 +51,25 @@ const getIndexOgImage = async () => {
   });
   return ogImage;
 };
+
 const ogImage = await getIndexOgImage();
 ---
 
 <Layout title={SITE_NAME} bodyClass="overflow-hidden" ogImage={ogImage.src}>
+  {
+    preload?.src && (
+      <link
+        slot="head"
+        rel="preload"
+        as="image"
+        fetchpriority="high"
+        imagesizes={preload.sizes}
+        imagesrcset={preload.srcset}
+        href={preload.src}
+        type="image/webp"
+      />
+    )
+  }
   <section
     class="m-8 small-landscape:m-8 sm:m-24 flex h-[calc(100dvh_-_4rem)] small-landscape:h-[calc(100dvh_-_4rem)] sm:h-[calc(100dvh_-_12rem)] overflow-hidden shadow-lg small-landscape:shadow-lg sm:shadow-2xl rounded-2xl"
   >

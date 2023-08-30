@@ -179,10 +179,10 @@ export async function getItems(): Promise<Item[]> {
           quality: 65,
           loading: "auto",
           aspect: 1,
-          sizes: `(min-width: 2560px) 296px,
+          sizes: `(min-width: 2000px) 296px,
             (min-width: 1440px) 216px,
             (min-width: 768px) 156px,
-            25vw
+            calc(25vw - 4rem)
             `,
           breakpoints: [156, 216, 296],
           placeholder: "blurred",
