@@ -36,7 +36,7 @@ const { title, bodyClass, ogImage } = Astro.props;
     {
       ogImage && (
         <>
-          <meta name="og:image" content={`${url}${ogImage}`} />
+          <meta property="og:image" content={`${url}${ogImage}`} />
           <meta property="twitter:image" content={`${url}${ogImage}`} />
         </>
       )
