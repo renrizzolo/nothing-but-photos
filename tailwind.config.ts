@@ -7,6 +7,7 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx,astro}",
     "./src/layouts/**/*.{js,ts,jsx,tsx,mdx,astro}",
   ],
+  future: { disableColorOpacityUtilitiesByDefault: true },
   theme: {
     extend: {
       backgroundImage: {
