@@ -51,7 +51,7 @@ const { item, next, prev } = Astro.props;
     </nav>
     <article>
       <section class="pb-12">
-        <figure>
+        <figure data-testid={item.slug}>
           <Fragment set:html={item.large.style + item.large.img} />
         </figure>
       </section>

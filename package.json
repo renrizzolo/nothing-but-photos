@@ -10,6 +10,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest",
+    "e2e": "npx playwright test",
     "generate-og-img": "node ./scripts/screenshot.mjs",
     "og": "concurrently -k \"npm run dev\" \"npm run generate-og-img\" || exit 0",
     "prepare": "husky install"
@@ -20,13 +21,13 @@
     ]
   },
   "dependencies": {
-    "@astrojs/react": "^2.2.1",
-    "@astrojs/tailwind": "^4.0.0",
+    "@astrojs/react": "^3.0.0",
+    "@astrojs/tailwind": "^5.0.0",
     "@fontsource/inter": "^5.0.8",
     "@nanostores/react": "^0.7.1",
     "@react-spring/web": "^9.7.3",
     "@use-gesture/react": "^10.2.27",
-    "astro": "^2.10.4",
+    "astro": "^3.0.3",
     "astro-imagetools": "^0.9.0",
     "color": "^4.2.3",
     "exif-reader": "^1.2.0",
@@ -38,6 +39,7 @@
     "tailwindcss": "^3.3.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.37.1",
     "@testing-library/jest-dom": "^6.0.1",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",

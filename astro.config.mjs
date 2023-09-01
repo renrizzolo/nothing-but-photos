@@ -13,13 +13,14 @@ export default defineConfig({
       applyBaseStyles: false,
     }),
   ],
-  experimental: {
-    assets: true,
-    viewTransitions: true,
-  },
   vite: {
     optimizeDeps: {
       exclude: ["astro-imagetools"],
+    },
+    test: {
+      // only include src so we don't run
+      // e2e tests via vitest - we do that with npx playwright
+      include: ["./src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     },
   },
   build: {
