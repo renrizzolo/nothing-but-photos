@@ -11,6 +11,9 @@ import {
 
 import "./grid.css";
 
+const useServerCompatibleEffect =
+  typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
+
 type SpringVal = { x: number; y: number };
 
 // there are 4 clones in a 2x2 grid
@@ -53,11 +56,11 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   const animateToItem = React.useCallback(
     (el?: HTMLElement) => {
       return new Promise((resolve) => {
-        if (el) {
+        if (el && containerWidth) {
           const { x, y } = el?.getBoundingClientRect?.() || {};
           const offsetX = (window.innerWidth - containerWidth) / 2;
           const offsetY = (window.innerHeight - containerHeight) / 2;
-
+          console.log({ containerWidth, offsetX });
           api.start({
             to: async (next) => {
               await next({
@@ -80,13 +83,12 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     if (el) {
       // when we have the item name but not the full id, animate
       // into view the first occurence of that item
-
       // await the animation so focus() doesn't
       // cause the browser to scroll the container to the element
       // when it's out of view
       await animateToItem(el);
     } else {
-      el = document.getElementById($activeId.get() ?? "");
+      el = $activeId.get() ? document.getElementById($activeId.get()!) : null;
     }
     el?.focus();
   }, [animateToItem]);
@@ -95,10 +97,30 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     focusItem();
   }, [focusItem]);
 
+  const didFocusItemRef = React.useRef(false);
+
+  useServerCompatibleEffect(() => {
+    // @ts-expect-error startViewTransition
+    if (!document.startViewTransition) {
+      if (didFocusItemRef.current) return;
+      // this is a bit hacky, but astro:page-load behaves
+      // differently in browsers that don't
+      // support view transitions
+      setTimeout(() => focusItem(), 200);
+      if (containerWidth) didFocusItemRef.current = true;
+    }
+  }, [containerWidth]);
+
   React.useEffect(() => {
+    // @ts-expect-error startViewTransition
+    if (!document.startViewTransition) {
+      return;
+    }
     // this happes too late, but astro:beforeload is too early
-    document.addEventListener("astro:load", onLoad, { once: true });
-    return () => document.removeEventListener("astro:load", onLoad);
+    document.addEventListener("astro:page-load", onLoad, { once: true });
+    return () => {
+      document.removeEventListener("astro:page-load", onLoad);
+    };
   }, [onLoad]);
 
   const updateGrid = React.useCallback(() => {
@@ -131,13 +153,13 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
 
   const isUpdateRef = React.useRef(false);
 
-  React.useLayoutEffect(() => {
+  useServerCompatibleEffect(() => {
     updateGrid();
   }, [updateGrid]);
 
   const resizeRef = React.useRef<ResizeObserver>();
 
-  React.useLayoutEffect(() => {
+  useServerCompatibleEffect(() => {
     if (rootRef.current && !resizeRef.current) {
       resizeRef.current = new ResizeObserver((entries) => {
         for (const entry of entries) {
@@ -155,10 +177,11 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     }
   }, [containerWidth, debouncedUpdateGrid]);
 
-  const cleanup = React.useCallback(() => {
-    resizeRef.current?.disconnect();
-    document.removeEventListener("astro:load", onLoad);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  React.useEffect(() => {
+    return () => {
+      resizeRef.current?.disconnect();
+      resizeRef.current = undefined;
+    };
   }, []);
 
   // clone items if they don't fill a screen
@@ -361,10 +384,11 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
       $activeId.set(id);
       // force update because subscribing to nanostores is
       // creating some kind of memory leak
+      // (this guarantees the new activeId will be set for the outgoing
+      // view-transition)
       forceUpdate();
-      cleanup();
     },
-    [spring.x, spring.y, cleanup]
+    [spring.x, spring.y]
   );
 
   return (
@@ -373,6 +397,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
         ref={gridRef}
         data-testid="grid-drag"
         className={`relative w-full h-full overflow-hidden touch-none`}
+        aria-label="Photo grid"
       >
         {thumbSize ? (
           <a.div

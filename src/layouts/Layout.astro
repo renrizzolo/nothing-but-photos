@@ -46,7 +46,7 @@ const { title, bodyClass, ogImage } = Astro.props;
     <title>{title}</title>
   </head>
   <body
-    class={`text-stone-950 dark:text-stone-50 bg-white dark:bg-black ${bodyClass}`}
+    class={`text-stone-950 dark:text-stone-50 bg-white dark:bg-black ${bodyClass ?? ''}`}
   >
     <main>
       <Header />
