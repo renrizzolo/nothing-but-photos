@@ -77,9 +77,9 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   );
 
   const focusItem = React.useCallback(async () => {
-    let el = document.querySelector<HTMLElement>(
-      `[data-slug="${$activeId.get()}"]`
-    );
+    let el = $activeId.get()
+      ? document.querySelector<HTMLElement>(`[data-slug="${$activeId.get()}"]`)
+      : null;
     if (el) {
       // when we have the item name but not the full id, animate
       // into view the first occurence of that item
@@ -392,7 +392,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   );
 
   return (
-    <div ref={rootRef} className="w-full h-full">
+    <div ref={rootRef} data-testid="grid-root" className="w-full h-full">
       <div
         ref={gridRef}
         data-testid="grid-drag"

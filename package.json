@@ -27,7 +27,7 @@
     "@nanostores/react": "^0.7.1",
     "@react-spring/web": "^9.7.3",
     "@use-gesture/react": "^10.2.27",
-    "astro": "^3.0.3",
+    "astro": "^3.0.8",
     "astro-imagetools": "^0.9.0",
     "color": "^4.2.3",
     "exif-reader": "^1.2.0",
@@ -35,30 +35,27 @@
     "lodash.kebabcase": "^4.1.1",
     "nanostores": "^0.9.3",
     "react-use-measure": "^2.1.1",
-    "sharp": "^0.32.4",
+    "sharp": "^0.32.5",
     "tailwindcss": "^3.3.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.37.1",
-    "@testing-library/jest-dom": "^6.0.1",
+    "@testing-library/jest-dom": "^6.1.2",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/exif-reader": "^1.0.0",
     "@types/lodash.debounce": "^4.0.7",
     "@types/lodash.kebabcase": "^4.1.7",
-    "@typescript-eslint/eslint-plugin": "^6.3.0",
-    "@typescript-eslint/parser": "^6.3.0",
-    "concurrently": "^8.2.0",
-    "eslint": "^8.46.0",
-    "eslint-plugin-react": "^7.33.1",
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
+    "concurrently": "^8.2.1",
+    "eslint": "^8.48.0",
+    "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.3",
-    "jsdom-testing-mocks": "^1.9.0",
-    "lint-staged": "^13.2.3",
-    "puppeteer-core": "^21.0.3",
-    "vitest": "^0.34.2"
-  },
-  "overrides": {
-    "puppeteer-core": "^21.0.3"
+    "jsdom-testing-mocks": "^1.10.0",
+    "lint-staged": "^14.0.1",
+    "puppeteer-core": "^21.1.1",
+    "vitest": "^0.34.3"
   }
 }

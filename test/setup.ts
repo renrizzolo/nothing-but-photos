@@ -1,10 +1,11 @@
+import * as matchers from "@testing-library/jest-dom/matchers";
+import type { EventType } from "@testing-library/react";
+import { act, cleanup, createEvent } from "@testing-library/react";
 import { configMocks } from "jsdom-testing-mocks";
 import { afterEach, expect } from "vitest";
 
-import matchers from "@testing-library/jest-dom/matchers";
-import { EventType, act, cleanup, createEvent } from "@testing-library/react";
-
 expect.extend(matchers);
+
 beforeEach(() => {
   patchCreateEvent(createEvent);
 });

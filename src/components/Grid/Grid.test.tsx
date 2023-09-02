@@ -1,18 +1,24 @@
 import "@testing-library/jest-dom";
 import {
+  act,
   createEvent,
   fireEvent,
   render,
   screen,
   waitFor,
 } from "@testing-library/react";
-import { mockIntersectionObserver } from "jsdom-testing-mocks";
-import type React from "react";
+import {
+  mockIntersectionObserver,
+  mockResizeObserver,
+} from "jsdom-testing-mocks";
+import React from "react";
 import { vi } from "vitest";
 import { Grid, getContainerSize, getThumbSize } from "./Grid";
 const io = mockIntersectionObserver();
+const ro = mockResizeObserver();
 
 beforeEach(() => {
+  vi.useFakeTimers();
   vi.stubGlobal("innerWidth", 1920);
   vi.stubGlobal("innerHeight", 1080);
 });
@@ -51,7 +57,12 @@ test("it renders when empty", () => {
 
 test("it renders the correct amount of items for desktop", () => {
   render(<Grid items={mockItems} />);
+  ro.mockElementSize(screen.getByTestId("grid-root"), {
+    contentBoxSize: { blockSize: 1080 },
+  });
+  vi.runAllTicks();
   io.enterNode(screen.getByTestId("grid-container-0"));
+
   expect(screen.getAllByAltText("A Photo")).toHaveLength(
     getExpectedItemsCount()
   );
@@ -88,41 +99,48 @@ test("it renders the correct amount of items for mobile (landscape)", () => {
 
 test("it is draggable", async () => {
   render(<Grid items={mockItems} />);
+
   // trigger the intersection observer for the frame (useInView())
   io.enterNode(screen.getByTestId("grid-container-0"));
   expect(screen.getByTestId("a-slug-0-0")).toBeInTheDocument();
 
-  const [containerWidth] = getContainerSize();
+  const [containerWidth, containerHeight] = getContainerSize();
 
   const width = containerWidth * WIDTH_MULTIPLIER;
-
+  const height = containerHeight;
+  console.log({ width, height });
   expect(screen.getByTestId("grid-animatable")).toHaveStyle({
     transform: "none",
   });
 
   io.leaveNode(screen.getByTestId("grid-container-0"));
   io.enterNode(screen.getByTestId("grid-container-1"));
+  vi.runAllTimers();
 
-  const dragEl = screen.getByTestId("grid-drag");
   const tapThreshold = 5;
-  await drag(dragEl, { x: width + tapThreshold, y: 0 });
-
-  expect(screen.getByTestId("a-slug-0-1")).toBeInTheDocument();
-
-  await waitFor(() => {
-    expect(screen.getByTestId("grid-animatable")).toHaveStyle({
-      transform: `translate3d(${-width}px,0,0)`,
-    });
+  drag(screen.getByTestId("grid-drag"), {
+    x: width + tapThreshold,
+    y: 0,
   });
 
+  console.log("1");
+  expect(screen.getByTestId("a-slug-0-1")).toBeInTheDocument();
+  vi.runAllTimers();
+
+  console.log(screen.getByTestId("grid-animatable").style.transform);
+  expect(screen.getByTestId("grid-animatable")).toHaveStyle({
+    transform: `translate3d(-${width}px,0,0)`,
+  });
+
+  console.log("3");
   await drag(screen.getByTestId("grid-drag"), {
     x: 300 + tapThreshold,
     y: -300 - 5,
   });
-  await waitFor(() => {
-    expect(screen.getByTestId("grid-animatable")).toHaveStyle({
-      transform: `translate3d(${-width + 300}px,-300px,0)`,
-    });
+  vi.runAllTimers();
+
+  expect(screen.getByTestId("grid-animatable")).toHaveStyle({
+    transform: `translate3d(${-width + 300}px,-300px,0)`,
   });
 });
 
@@ -138,13 +156,14 @@ const drag = async (el: Element, to: { x: number; y: number }) => {
   });
   fireEvent(el, down);
   const toParams = {
-    clientX: coords.clientX + to.x,
-    clientY: coords.clientY + to.y,
+    clientX: to.x,
+    clientY: to.y,
     buttons: 1,
   };
   const move = createEvent.pointerMove(el, toParams);
 
   fireEvent(el, move);
+
   const up = createEvent.pointerUp(el, toParams);
   fireEvent(el, up);
 };
