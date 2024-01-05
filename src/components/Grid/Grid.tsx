@@ -26,7 +26,6 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     return $initialCoords.get();
   }, []);
 
-  const wheelOffset = React.useRef(0);
   const dragOffset = React.useRef([0, 0]);
   const gridRef = React.useRef(null);
   const thumbSizeRef = React.useRef(0);
@@ -354,9 +353,8 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
       }) => {
         event.preventDefault();
         if (dy) {
-          wheelOffset.current = y;
           runSpring({
-            x: dragOffset.current[0] + y,
+            x: -y,
             y: dragOffset.current[1],
             dx: -dy,
             dy: 0,
@@ -369,7 +367,11 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     },
     {
       target: gridRef,
-      wheel: { eventOptions: { passive: false } },
+      wheel: {
+        from: () => [spring.x.get(), spring.x.get()],
+        eventOptions: { passive: false },
+        axis: "y",
+      },
       drag: {
         filterTaps: true,
         tapsThreshold: 5,
