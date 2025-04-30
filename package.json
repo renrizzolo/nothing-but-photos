@@ -41,7 +41,7 @@
     "tailwindcss": "^3.3.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.37.1",
+    "@playwright/test": "^1.52.0",
     "@testing-library/jest-dom": "^6.1.2",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
