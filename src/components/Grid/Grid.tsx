@@ -26,7 +26,6 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     return $initialCoords.get();
   }, []);
 
-  const dragOffset = React.useRef([0, 0]);
   const gridRef = React.useRef(null);
   const thumbSizeRef = React.useRef(0);
 
@@ -341,34 +340,56 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
       }) => {
         if (tap) event.preventDefault();
         if (dx || dy) {
-          dragOffset.current = [-x, -y];
           runSpring({ x: -x, y: -y, dx: -dx, dy: -dy, vx, vy, down });
         }
       },
       onWheel: ({
         event,
-        offset: [, y],
-        direction: [, dy],
-        velocity: [vx, vy],
+        movement: [, wheelY],
+        direction: [, wheelDy],
+        velocity: [, wheelVy],
+        ctrlKey,
+        memo,
       }) => {
         event.preventDefault();
-        if (dy) {
-          runSpring({
-            x: -y,
-            y: dragOffset.current[1],
-            dx: -dy,
-            dy: 0,
-            vx,
-            vy,
-            down: true,
-          });
+        if (wheelDy) {
+          // save the current position
+          // so we can use it to calculate the new position
+          if (!memo) {
+            memo = { x: -spring.x.get(), y: -spring.y.get(), ctrlKey };
+          }
+
+          // move vertically when ctrlKey is pressed
+          if (ctrlKey) {
+            runSpring({
+              x: memo.x,
+              y: -wheelY + memo.y,
+              dx: 0,
+              dy: -wheelDy,
+              vx: 0,
+              vy: wheelVy,
+              down: true,
+            });
+            // move horizontally
+          } else {
+            runSpring({
+              x: -wheelY + memo.x,
+              y: memo.y,
+              dx: -wheelDy,
+              dy: 0,
+              vx: wheelVy,
+              vy: 0,
+              down: true,
+            });
+          }
         }
+
+        return memo;
       },
     },
     {
       target: gridRef,
       wheel: {
-        from: () => [spring.x.get(), spring.x.get()],
         eventOptions: { passive: false },
         axis: "y",
       },
