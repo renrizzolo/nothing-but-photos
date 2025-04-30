@@ -3,7 +3,7 @@ import "@fontsource/inter/latin-400.css";
 import "@fontsource/inter/latin-700.css";
 import Footer from "@/components/Footer/Footer.astro";
 import Header from "@/components/Header/Header.astro";
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -41,7 +41,8 @@ const { title, bodyClass, ogImage } = Astro.props;
         </>
       )
     }
-    <ViewTransitions />
+    
+    <ClientRouter />
 
     <title>{title}</title>
   </head>
