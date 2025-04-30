@@ -10,6 +10,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --fix .",
     "e2e": "npx playwright test",
     "generate-og-img": "node ./scripts/screenshot.mjs",
     "og": "concurrently -k \"npm run dev\" \"npm run generate-og-img\" || exit 0",
@@ -56,6 +58,7 @@
     "jsdom-testing-mocks": "^1.10.0",
     "lint-staged": "^14.0.1",
     "puppeteer-core": "^21.1.1",
+    "typescript": "^5.8.3",
     "vitest": "^0.34.3"
   }
 }
