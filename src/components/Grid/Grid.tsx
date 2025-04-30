@@ -58,7 +58,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
           const { x, y } = el?.getBoundingClientRect?.() || {};
           const offsetX = (window.innerWidth - containerWidth) / 2;
           const offsetY = (window.innerHeight - containerHeight) / 2;
-          console.log({ containerWidth, offsetX });
+
           api.start({
             to: async (next) => {
               await next({
@@ -88,36 +88,20 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     } else {
       el = $activeId.get() ? document.getElementById($activeId.get()!) : null;
     }
+    console.log("focusItem", el, $activeId.get());
     el?.focus();
   }, [animateToItem]);
-
-  const onLoad = React.useCallback(() => {
-    focusItem();
-  }, [focusItem]);
 
   const didFocusItemRef = React.useRef(false);
 
   useServerCompatibleEffect(() => {
-    if (!document.startViewTransition) {
-      if (didFocusItemRef.current) return;
-      // this is a bit hacky, but astro:page-load behaves
-      // differently in browsers that don't
-      // support view transitions
-      setTimeout(() => focusItem(), 200);
-      if (containerWidth) didFocusItemRef.current = true;
-    }
-  }, [containerWidth]);
-
-  React.useEffect(() => {
-    if (!document.startViewTransition) {
-      return;
-    }
-    // this happes too late, but astro:beforeload is too early
-    document.addEventListener("astro:page-load", onLoad, { once: true });
-    return () => {
-      document.removeEventListener("astro:page-load", onLoad);
-    };
-  }, [onLoad]);
+    if (didFocusItemRef.current) return;
+    // focus the previously selected item on mount
+    setTimeout(() => {
+      focusItem();
+      didFocusItemRef.current = true;
+    }, 100);
+  }, [focusItem]);
 
   const updateGrid = React.useCallback(() => {
     const [cw, ch] = getContainerSize();
@@ -518,7 +502,7 @@ const GridThumb = React.memo(
   }) => {
     return (
       <a
-        className={`${active ? "full-image" : ""} grid-item-anchor`}
+        className={`${active ? "full-image " : ""}grid-item-anchor`}
         href={`/photo/${slug}/`}
         onPointerDown={(e) => {
           e.preventDefault();
