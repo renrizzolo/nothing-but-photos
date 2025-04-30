@@ -1,12 +1,5 @@
 import "@testing-library/jest-dom";
-import {
-  act,
-  createEvent,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { createEvent, fireEvent, render, screen } from "@testing-library/react";
 import {
   mockIntersectionObserver,
   mockResizeObserver,

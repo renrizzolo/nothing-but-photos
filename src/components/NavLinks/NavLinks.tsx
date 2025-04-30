@@ -29,19 +29,22 @@ export const NavLinks = ({
     anchor?.click?.();
   };
 
-  const handleKeys = (e: KeyboardEvent) => {
-    // simulate browser navigation because Astro doesn't have a
-    // router we can use programmatically
-    if (e.key === "Escape") {
-      handleNavigate("back");
-    }
-    if (e.key === "ArrowLeft" && prev) {
-      handleNavigate("prev");
-    }
-    if (e.key === "ArrowRight" && next) {
-      handleNavigate("next");
-    }
-  };
+  const handleKeys = React.useCallback(
+    (e: KeyboardEvent) => {
+      // simulate browser navigation because Astro doesn't have a
+      // router we can use programmatically
+      if (e.key === "Escape") {
+        handleNavigate("back");
+      }
+      if (e.key === "ArrowLeft" && prev) {
+        handleNavigate("prev");
+      }
+      if (e.key === "ArrowRight" && next) {
+        handleNavigate("next");
+      }
+    },
+    [next, prev]
+  );
 
   const handleCleanup = (clearActiveItem: boolean = false) => {
     document.removeEventListener("keydown", handleKeys);
@@ -61,11 +64,11 @@ export const NavLinks = ({
 
   React.useEffect(() => {
     document.addEventListener("keydown", handleKeys);
+
     return () => {
-      // this wont't fire
       document.removeEventListener("keydown", handleKeys);
     };
-  }, []);
+  }, [handleKeys]);
 
   return (
     <>

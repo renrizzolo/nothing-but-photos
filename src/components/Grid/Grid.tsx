@@ -98,7 +98,6 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   const didFocusItemRef = React.useRef(false);
 
   useServerCompatibleEffect(() => {
-    // @ts-expect-error startViewTransition
     if (!document.startViewTransition) {
       if (didFocusItemRef.current) return;
       // this is a bit hacky, but astro:page-load behaves
@@ -110,7 +109,6 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   }, [containerWidth]);
 
   React.useEffect(() => {
-    // @ts-expect-error startViewTransition
     if (!document.startViewTransition) {
       return;
     }
@@ -396,6 +394,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
       drag: {
         filterTaps: true,
         tapsThreshold: 5,
+        eventOptions: { passive: false },
         from: () => [spring.x.get(), spring.y.get()],
       },
     }

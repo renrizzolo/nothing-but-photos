@@ -1,7 +1,9 @@
 import type { GetImageResult, ImageMetadata } from "astro";
+// @ts-expect-error no types
 import type { ImgHTMLData } from "astro-imagetools";
 //@ts-expect-error no types
 import { renderImg as _renderImg } from "astro-imagetools/api";
+// @ts-expect-error no types
 import type TRenderImg from "astro-imagetools/api/renderImg";
 import { getImage } from "astro:assets";
 import exifReader from "exif-reader";
