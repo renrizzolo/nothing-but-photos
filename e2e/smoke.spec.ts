@@ -82,9 +82,12 @@ test.describe("Smoke tests", () => {
     await page.goto("/");
     await page.getByTestId(testSelectors[0]).waitFor({ state: "visible" });
     await page.getByTestId(testSelectors[0]).click();
-    await page.getByText("Next").click();
+    await page.waitForLoadState("networkidle");
 
+    await page.getByText("Next").click();
+    await page.waitForLoadState("networkidle");
     await page.getByTestId(photos[1]).waitFor({ state: "visible" });
+
     expect(page.url()).toMatch(`/photo/${photos[1]}/`);
 
     await page.getByText("Return").click();
@@ -108,6 +111,7 @@ test.describe("Smoke tests", () => {
 
     await page.getByText("Return").click();
     await page.waitForLoadState("networkidle");
+
     await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
 
     await expect(page.getByTestId(testSelectors[1])).toBeFocused();
