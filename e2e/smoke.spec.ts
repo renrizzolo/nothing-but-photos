@@ -57,7 +57,7 @@ test.describe("Smoke tests", () => {
     expect(page.url()).toMatch(`/photo/${photos[0]}/`);
   });
 
-  test.only("thumb is focused on return", async ({ page }) => {
+  test("thumb is focused on return", async ({ page }) => {
     await page.goto("/");
     await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
     await page.getByTestId(testSelectors[1]).click();
