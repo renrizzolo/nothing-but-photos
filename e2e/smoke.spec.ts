@@ -53,16 +53,22 @@ test.describe("Smoke tests", () => {
     await page.goto("/");
     await page.getByTestId(testSelectors[0]).waitFor({ state: "visible" });
     await page.getByTestId(testSelectors[0]).click();
+    await page.getByTestId(photos[0]).waitFor({ state: "visible" });
     expect(page.url()).toMatch(`/photo/${photos[0]}/`);
   });
 
-  test("thumb is focused on return", async ({ page }) => {
+  test.only("thumb is focused on return", async ({ page }) => {
     await page.goto("/");
     await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
     await page.getByTestId(testSelectors[1]).click();
 
+    await page.getByTestId(photos[1]).waitFor({ state: "visible" });
+
     expect(page.url()).toMatch(`/photo/${photos[1]}/`);
+
     await page.getByText("Return").click();
+
+    await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
 
     expect(page.url()).toEqual(`${baseURL}/`);
     await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
@@ -77,16 +83,14 @@ test.describe("Smoke tests", () => {
     await page.getByTestId(testSelectors[0]).waitFor({ state: "visible" });
     await page.getByTestId(testSelectors[0]).click();
     await page.getByText("Next").click();
-    expect(page.url()).toMatch(`/photo/${photos[1]}/`);
+
     await page.getByTestId(photos[1]).waitFor({ state: "visible" });
+    expect(page.url()).toMatch(`/photo/${photos[1]}/`);
 
     await page.getByText("Return").click();
+    await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
     expect(page.url()).toEqual(`${baseURL}/`);
 
-    await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
-    // we have to guarantee the decay animation has finished, so the final x/y
-    // can be expected
-    await page.waitForTimeout(1200);
     await expect(page.getByTestId(testSelectors[1])).toBeFocused();
     const bb = await page.getByTestId(testSelectors[1]).boundingBox();
     expect(bb).toStrictEqual(getBoundingBoxForViewport(viewport, bb));
@@ -102,9 +106,7 @@ test.describe("Smoke tests", () => {
     await page.getByText("Return").click();
 
     await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
-    // we have to guarantee the decay animation has finished, so the final x/y
-    // can be expected
-    await page.waitForTimeout(1200);
+
     await expect(page.getByTestId(testSelectors[1])).toBeFocused();
     const bb = await page.getByTestId(testSelectors[1]).boundingBox();
     expect(bb).toStrictEqual(getBoundingBoxForViewport(viewport, bb));

@@ -13,6 +13,7 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint --fix .",
     "e2e": "npx playwright test",
+    "e2e:dev": "npx playwright test --ui",
     "generate-og-img": "node ./scripts/screenshot.mjs",
     "og": "concurrently -k \"npm run dev\" \"npm run generate-og-img\" || exit 0",
     "prepare": "husky install"
