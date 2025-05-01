@@ -88,11 +88,15 @@ test.describe("Smoke tests", () => {
     expect(page.url()).toMatch(`/photo/${photos[1]}/`);
 
     await page.getByText("Return").click();
-    await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
+    const item = page.getByTestId(testSelectors[1]);
+
+    await page
+      .getByTestId(testSelectors[1])
+      .waitFor({ state: "visible", timeout: 200 });
     expect(page.url()).toEqual(`${baseURL}/`);
 
-    await expect(page.getByTestId(testSelectors[1])).toBeFocused();
-    const bb = await page.getByTestId(testSelectors[1]).boundingBox();
+    await expect(item).toBeFocused();
+    const bb = await item.boundingBox();
     expect(bb).toStrictEqual(getBoundingBoxForViewport(viewport, bb));
   });
 
@@ -105,7 +109,9 @@ test.describe("Smoke tests", () => {
 
     await page.getByText("Return").click();
 
-    await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
+    await page
+      .getByTestId(testSelectors[1])
+      .waitFor({ state: "visible", timeout: 200 });
 
     await expect(page.getByTestId(testSelectors[1])).toBeFocused();
     const bb = await page.getByTestId(testSelectors[1]).boundingBox();

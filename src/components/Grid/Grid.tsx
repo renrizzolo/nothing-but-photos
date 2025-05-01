@@ -95,7 +95,10 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   const didFocusItemRef = React.useRef(false);
 
   useServerCompatibleEffect(() => {
-    if (didFocusItemRef.current) return;
+    if (didFocusItemRef.current) {
+      return;
+    }
+
     // focus the previously selected item on mount
     setTimeout(() => {
       focusItem();
