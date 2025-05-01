@@ -88,11 +88,10 @@ test.describe("Smoke tests", () => {
     expect(page.url()).toMatch(`/photo/${photos[1]}/`);
 
     await page.getByText("Return").click();
+    await page.waitForLoadState("networkidle");
     const item = page.getByTestId(testSelectors[1]);
 
-    await page
-      .getByTestId(testSelectors[1])
-      .waitFor({ state: "visible", timeout: 200 });
+    await item.waitFor({ state: "visible" });
     expect(page.url()).toEqual(`${baseURL}/`);
 
     await expect(item).toBeFocused();
@@ -108,10 +107,8 @@ test.describe("Smoke tests", () => {
     await page.getByTestId(photos[1]).waitFor({ state: "visible" });
 
     await page.getByText("Return").click();
-
-    await page
-      .getByTestId(testSelectors[1])
-      .waitFor({ state: "visible", timeout: 200 });
+    await page.waitForLoadState("networkidle");
+    await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
 
     await expect(page.getByTestId(testSelectors[1])).toBeFocused();
     const bb = await page.getByTestId(testSelectors[1]).boundingBox();
