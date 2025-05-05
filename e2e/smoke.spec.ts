@@ -1,7 +1,19 @@
+import { getItemId } from "@/slug";
 import { test, expect, type ViewportSize } from "@playwright/test";
 import { baseURL } from "playwright.config";
 const photos = ["dscf-9644", "dscf-9640"];
-const testSelectors = [`${photos[0]}-0-0`, `${photos[1]}-1-0`];
+const testSelectors = [
+  getItemId({
+    slug: photos[0],
+    index: 0,
+    frameIndex: 0,
+  }),
+  getItemId({
+    slug: photos[1],
+    index: 1,
+    frameIndex: 0,
+  }),
+];
 
 const getBoundingBoxForViewport = (
   viewport: ViewportSize | null,
@@ -53,6 +65,7 @@ test.describe("Smoke tests", () => {
     await page.goto("/");
     await page.getByTestId(testSelectors[0]).waitFor({ state: "visible" });
     await page.getByTestId(testSelectors[0]).click();
+    await page.getByTestId(photos[0]).waitFor({ state: "visible" });
     expect(page.url()).toMatch(`/photo/${photos[0]}/`);
   });
 
@@ -61,8 +74,13 @@ test.describe("Smoke tests", () => {
     await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
     await page.getByTestId(testSelectors[1]).click();
 
+    await page.getByTestId(photos[1]).waitFor({ state: "visible" });
+
     expect(page.url()).toMatch(`/photo/${photos[1]}/`);
+
     await page.getByText("Return").click();
+
+    await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
 
     expect(page.url()).toEqual(`${baseURL}/`);
     await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
@@ -76,19 +94,27 @@ test.describe("Smoke tests", () => {
     await page.goto("/");
     await page.getByTestId(testSelectors[0]).waitFor({ state: "visible" });
     await page.getByTestId(testSelectors[0]).click();
+    await page.waitForLoadState("networkidle");
+
     await page.getByText("Next").click();
-    expect(page.url()).toMatch(`/photo/${photos[1]}/`);
+    await page.waitForLoadState("networkidle");
     await page.getByTestId(photos[1]).waitFor({ state: "visible" });
 
+    expect(page.url()).toMatch(`/photo/${photos[1]}/`);
+
     await page.getByText("Return").click();
+    await page.waitForLoadState("networkidle");
+    const item = page.getByTestId(testSelectors[1]);
+
+    await item.waitFor({ state: "visible" });
     expect(page.url()).toEqual(`${baseURL}/`);
 
-    await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
-    // we have to guarantee the decay animation has finished, so the final x/y
-    // can be expected
-    await page.waitForTimeout(1200);
-    await expect(page.getByTestId(testSelectors[1])).toBeFocused();
-    const bb = await page.getByTestId(testSelectors[1]).boundingBox();
+    // wait for effect timeout
+    // TODO this is flaky
+    await page.waitForTimeout(500);
+    await expect(item).toBeFocused();
+
+    const bb = await item.boundingBox();
     expect(bb).toStrictEqual(getBoundingBoxForViewport(viewport, bb));
   });
 
@@ -101,12 +127,15 @@ test.describe("Smoke tests", () => {
 
     await page.getByText("Return").click();
 
-    await page.getByTestId(testSelectors[1]).waitFor({ state: "visible" });
-    // we have to guarantee the decay animation has finished, so the final x/y
-    // can be expected
-    await page.waitForTimeout(1200);
-    await expect(page.getByTestId(testSelectors[1])).toBeFocused();
-    const bb = await page.getByTestId(testSelectors[1]).boundingBox();
+    const item = page.getByTestId(testSelectors[1]);
+    await item.waitFor({ state: "visible" });
+
+    // wait for effect timeout
+    // TODO this is flaky
+    await page.waitForTimeout(500);
+    await expect(item).toBeFocused();
+
+    const bb = await item.boundingBox();
     expect(bb).toStrictEqual(getBoundingBoxForViewport(viewport, bb));
   });
 });

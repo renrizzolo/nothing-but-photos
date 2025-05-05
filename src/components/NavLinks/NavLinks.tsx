@@ -1,5 +1,6 @@
 import * as React from "react";
 import { activeId } from "@/components/Grid/gridStore";
+import { getSlugFromItemId } from "@/slug";
 
 const Link = ({
   children,
@@ -33,6 +34,7 @@ export const NavLinks = ({
     (e: KeyboardEvent) => {
       // simulate browser navigation because Astro doesn't have a
       // router we can use programmatically
+      // TODO - https://docs.astro.build/en/guides/view-transitions/#trigger-navigation
       if (e.key === "Escape") {
         handleNavigate("back");
       }
@@ -52,12 +54,16 @@ export const NavLinks = ({
   };
 
   React.useEffect(() => {
-    // make the current page active if it wasn't
-    // already set from the grid.
+    // make the current page active
     // cases:
     // - after prev/next navigation
     // - when directly browsing to a /photo/:name route
-    if (current && !activeId.get()) {
+    // - when using the browser back button
+    const id = activeId.get();
+
+    const activeIsCurrent = id !== null && getSlugFromItemId(id) === current;
+
+    if ((current && !activeId.get()) || !activeIsCurrent) {
       activeId.set(current);
     }
   }, [current]);
