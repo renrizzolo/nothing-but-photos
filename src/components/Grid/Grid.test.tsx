@@ -7,6 +7,7 @@ import {
 import React from "react";
 import { vi } from "vitest";
 import { Grid, getContainerSize, getThumbSize } from "./Grid";
+import { getItemId } from "@/slug";
 const io = mockIntersectionObserver();
 const ro = mockResizeObserver();
 
@@ -95,13 +96,20 @@ test("it is draggable", async () => {
 
   // trigger the intersection observer for the frame (useInView())
   io.enterNode(screen.getByTestId("grid-container-0"));
-  expect(screen.getByTestId("a-slug-0-0")).toBeInTheDocument();
+  expect(
+    screen.getByTestId(
+      getItemId({
+        slug: "a-slug",
+        index: 0,
+        frameIndex: 0,
+      })
+    )
+  ).toBeInTheDocument();
 
-  const [containerWidth, containerHeight] = getContainerSize();
+  const [containerWidth] = getContainerSize();
 
   const width = containerWidth * WIDTH_MULTIPLIER;
-  const height = containerHeight;
-  console.log({ width, height });
+
   expect(screen.getByTestId("grid-animatable")).toHaveStyle({
     transform: "none",
   });
@@ -116,16 +124,21 @@ test("it is draggable", async () => {
     y: 0,
   });
 
-  console.log("1");
-  expect(screen.getByTestId("a-slug-0-1")).toBeInTheDocument();
+  expect(
+    screen.getByTestId(
+      getItemId({
+        slug: "a-slug",
+        index: 1,
+        frameIndex: 0,
+      })
+    )
+  ).toBeInTheDocument();
   vi.runAllTimers();
 
-  console.log(screen.getByTestId("grid-animatable").style.transform);
   expect(screen.getByTestId("grid-animatable")).toHaveStyle({
     transform: `translate3d(-${width}px,0,0)`,
   });
 
-  console.log("3");
   await drag(screen.getByTestId("grid-drag"), {
     x: 300 + tapThreshold,
     y: -300 - 5,

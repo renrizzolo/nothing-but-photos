@@ -10,6 +10,7 @@ import {
 } from "./gridStore";
 
 import "./grid.css";
+import { getItemId } from "@/slug";
 
 const useServerCompatibleEffect =
   typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
@@ -51,6 +52,8 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   const itemsCount = items.length;
   const thumbSize = thumbSizeRef.current;
 
+  const loaded = width > 0 && height > 0;
+
   const animateToItem = React.useCallback(
     (el?: HTMLElement) => {
       return new Promise((resolve) => {
@@ -75,6 +78,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
   );
 
   const focusItem = React.useCallback(async () => {
+    // if we have the full id including the index, focus it
     let el = $activeId.get()
       ? document.querySelector<HTMLElement>(`[data-slug="${$activeId.get()}"]`)
       : null;
@@ -88,21 +92,21 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
     } else {
       el = $activeId.get() ? document.getElementById($activeId.get()!) : null;
     }
-    console.log("focusItem", el, $activeId.get());
+    console.log("focusItem", $activeId.get());
     el?.focus();
   }, [animateToItem]);
 
-  const didFocusItemRef = React.useRef(false);
+  const didAttemptFocusItemRef = React.useRef(false);
 
   useServerCompatibleEffect(() => {
-    if (didFocusItemRef.current) {
+    if (didAttemptFocusItemRef.current) {
       return;
     }
 
     // focus the previously selected item on mount
     setTimeout(() => {
       focusItem();
-      didFocusItemRef.current = true;
+      didAttemptFocusItemRef.current = true;
     }, 100);
   }, [focusItem]);
 
@@ -408,7 +412,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
         className={`relative w-full h-full overflow-hidden touch-none`}
         aria-label="Photo grid"
       >
-        {thumbSize ? (
+        {loaded ? (
           <a.div
             data-testid="grid-animatable"
             className="w-full h-full grid will-change-transform select-none"
@@ -429,19 +433,25 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
                 key={frameIndex}
                 index={frameIndex}
               >
-                {allItems.map((item, i) => (
-                  <GridThumb
-                    key={`${item.slug}-${i}-${frameIndex}`}
-                    html={frameIndex === 0 ? item.style + item.img : item.img}
-                    name={item.name}
-                    slug={item.slug}
-                    id={`${item.slug}-${i}-${frameIndex}`}
-                    active={
-                      $activeId.get() === `${item.slug}-${i}-${frameIndex}`
-                    }
-                    onNavigate={onNavigate}
-                  />
-                ))}
+                {allItems.map((item, index) => {
+                  const itemId = getItemId({
+                    slug: item.slug,
+                    index,
+                    frameIndex,
+                  });
+
+                  return (
+                    <GridThumb
+                      key={itemId}
+                      html={frameIndex === 0 ? item.style + item.img : item.img}
+                      name={item.name}
+                      slug={item.slug}
+                      id={itemId}
+                      active={$activeId.get() === itemId}
+                      onNavigate={onNavigate}
+                    />
+                  );
+                })}
               </GridContainer>
             ))}
           </a.div>
