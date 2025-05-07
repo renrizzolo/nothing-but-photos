@@ -90,6 +90,11 @@ export async function getItems(): Promise<Item[]> {
             break;
           case ".png":
             img = (await import(`../assets/photos/${name}.png`)).default;
+            break;
+          default:
+            throw new Error(
+              `Unsupported image extension: ${ext}. Only .jpg and .png are supported.`
+            );
         }
 
         const ogImage = await getImage({

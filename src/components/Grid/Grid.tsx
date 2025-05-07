@@ -557,6 +557,13 @@ const LoadingIndicator = () => (
   </div>
 );
 
+/** visible columns in the grid */
+const columns = {
+  small: 4,
+  short: 6,
+  default: 8,
+};
+
 /**
  * Get the thumbnail size to display
  * based on the current window width/height
@@ -566,9 +573,11 @@ const LoadingIndicator = () => (
  */
 export const getThumbSize = (containerWidth: number) => {
   let thumbSize =
-    containerWidth > 640 ? containerWidth / 8 : containerWidth / 4;
+    containerWidth > 640
+      ? containerWidth / columns.default
+      : containerWidth / columns.small;
   if (window.innerHeight < 480 && window.innerWidth < 960) {
-    thumbSize = containerWidth / 6;
+    thumbSize = containerWidth / columns.short;
   }
   return thumbSize;
 };
