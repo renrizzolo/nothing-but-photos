@@ -1,7 +1,9 @@
 import { getItemId } from "@/slug";
 import { test, expect, type ViewportSize } from "@playwright/test";
 import { baseURL } from "playwright.config";
-const photos = ["dscf-9644", "dscf-9640"];
+//  TODO - we shouldn't need to manually set this to the first 2 photos
+const photos = ["seoul-dscf-2385", "fujikawaguchiko-dscf-2100"];
+
 const testSelectors = [
   getItemId({
     slug: photos[0],
