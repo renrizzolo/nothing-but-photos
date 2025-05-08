@@ -118,7 +118,13 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
 
     // make horizontal plane 1.5x greater than the container width
     const colCount = Math.ceil((cw * 1.5) / thumbSize);
-    const rowCount = Math.ceil(ch / thumbSize);
+    // start with enough rows to fill the screen
+    let rowCount = Math.ceil(ch / thumbSize);
+
+    // we want to show all the items - increase rows if we have more items
+    if (colCount * rowCount < items.length) {
+      rowCount = Math.ceil(items.length / colCount);
+    }
 
     const height = rowCount * thumbSize;
     const width = colCount * thumbSize;
@@ -131,7 +137,7 @@ export const Grid = ({ items }: { items: GridItem[] }) => {
       columns: colCount,
       rows: rowCount,
     });
-  }, []);
+  }, [items.length]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedUpdateGrid = React.useCallback(debounce(updateGrid, 300), [
