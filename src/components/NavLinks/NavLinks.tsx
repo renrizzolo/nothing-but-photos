@@ -50,7 +50,10 @@ export const NavLinks = ({
 
   const handleCleanup = (clearActiveItem: boolean = false) => {
     document.removeEventListener("keydown", handleKeys);
-    clearActiveItem && activeId.set(null);
+
+    if (clearActiveItem) {
+      activeId.set(null);
+    }
   };
 
   React.useEffect(() => {

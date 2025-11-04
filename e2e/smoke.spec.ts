@@ -2,7 +2,7 @@ import { getItemId } from "@/slug";
 import { test, expect, type ViewportSize } from "@playwright/test";
 import { baseURL } from "playwright.config";
 //  TODO - we shouldn't need to manually set this to the first 2 photos
-const photos = ["seoul-dscf-2385", "fujikawaguchiko-dscf-2100"];
+const photos = ["singapore-dscf-4238", "taipei-dscf-4232"];
 
 const testSelectors = [
   getItemId({

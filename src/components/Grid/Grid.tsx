@@ -1,6 +1,5 @@
 import type { GridItem } from "@/api";
-import type { Controller, OnChange, SpringValue } from "@react-spring/web";
-import { a, useInView, useSpring } from "@react-spring/web";
+
 import { useGesture } from "@use-gesture/react";
 import debounce from "lodash.debounce";
 import React from "react";
@@ -8,9 +7,16 @@ import {
   activeId as $activeId,
   initialCoords as $initialCoords,
 } from "./gridStore";
-
-import "./grid.css";
 import { getItemId } from "@/slug";
+import {
+  Controller,
+  type OnChange,
+  SpringValue,
+  a,
+  useInView,
+  useSpring,
+} from "@react-spring/web";
+import "./grid.css";
 
 const useServerCompatibleEffect =
   typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
