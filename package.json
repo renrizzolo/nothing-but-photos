@@ -9,7 +9,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test": "vitest",
+    "test": "vitest --run",
     "type-check": "tsc --noEmit",
     "lint": "eslint --fix .",
     "e2e": "npx playwright test",

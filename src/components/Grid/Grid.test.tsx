@@ -134,11 +134,11 @@ test("it is draggable", async () => {
     )
   ).toBeInTheDocument();
 
-  await vi.runAllTimersAsync();
+  vi.runAllTimers();
 
-  // expect(screen.getByTestId("grid-animatable")).toHaveStyle({
-  //   transform: `translate3d(-${width}px,0,0)`,
-  // });
+  expect(screen.getByTestId("grid-animatable")).toHaveStyle({
+    transform: `translate3d(-${width}px,0,0)`,
+  });
 
   await drag(screen.getByTestId("grid-drag"), {
     x: 300 + tapThreshold,
