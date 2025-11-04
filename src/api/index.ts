@@ -111,25 +111,27 @@ export async function getItems(): Promise<Item[]> {
         // const { dominant } = await sh.stats();
         // const color = Color(dominant);
         // const [h, s, l] = color.hsl().array();
-        interface Exif extends Omit<ReturnType<typeof exifReader>, "exif"> {
-          exif?: Record<string, string | number>;
-        }
-        const exif = meta.exif ? (exifReader(meta.exif) as Exif) : {};
+
+        const exif = meta.exif ? exifReader(meta.exif) : null;
+
         // use the capture date, fall back to the modifty date (when film was scanned, probably)
         const exifDate =
-          exif?.exif?.DateTimeOriginal ?? (exif?.image?.ModifyDate as number);
+          exif?.Photo?.DateTimeOriginal ??
+          exif?.Photo?.DateTimeDigitized ??
+          exif?.Image?.DateTime;
 
         const imageInfo: Item["info"] = {
           // Make: exif?.image?.Make,
           // Model: exif?.image?.Model,
-          Camera: exif?.image?.Make
-            ? `${exif?.image?.Make} ${exif?.image?.Model}`
+          Camera: exif?.Image?.Make
+            ? `${exif?.Image?.Make} ${exif?.Image?.Model}`
             : undefined,
           "Capture Date": exifDate
             ? new Date(exifDate).toLocaleDateString("en-GB", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
+                timeZone: "UTC",
               })
             : undefined,
         };
@@ -137,19 +139,20 @@ export async function getItems(): Promise<Item[]> {
         const imageMeta: Item["metadata"] = {
           // Make: exif?.image?.Make,
           // Model: exif?.image?.Model,
-          Lens: exif?.exif?.LensModel
-            ? `${exif?.exif?.LensModel}`?.split("\u0000")?.[0]
+          Lens: exif?.Photo?.LensModel
+            ? `${exif?.Photo?.LensModel}`?.split("\u0000")?.[0]
             : undefined,
-          "F Stop": exif?.exif?.FNumber,
-          ISO: exif?.exif?.ISO,
-          "Shutter Speed": exif?.exif?.ExposureTime
-            ? `1/${Math.round(1 / Number(exif.exif.ExposureTime))}`
+          "F Stop": exif?.Photo?.FNumber,
+          ISO: exif?.Photo?.ISOSpeedRatings,
+          "Shutter Speed": exif?.Photo?.ExposureTime
+            ? `1/${Math.round(1 / Number(exif.Photo.ExposureTime))}`
             : undefined,
         };
 
-        const makeModel = exif?.image?.Make
-          ? `${exif?.image?.Make} ${exif?.image?.Model}`
+        const makeModel = exif?.Image?.Make
+          ? `${exif?.Image?.Make} ${exif?.Image?.Model}`
           : "unknown camera";
+
         const date = exifDate
           ? `${new Date(exifDate).toLocaleDateString("en-GB")}`
           : "unknown date";
@@ -194,7 +197,7 @@ export async function getItems(): Promise<Item[]> {
           breakpoints: [156, 216, 296],
           placeholder: "blurred",
         });
-
+        console.log(name, kebabCase(name.toLowerCase()));
         const item = {
           large: opt,
           thumb: thumbOpt,

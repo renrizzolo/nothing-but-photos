@@ -5,7 +5,7 @@ import {
   mockResizeObserver,
 } from "jsdom-testing-mocks";
 import React from "react";
-import { vi } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { Grid, getContainerSize, getThumbSize } from "./Grid";
 import { getItemId } from "@/slug";
 const io = mockIntersectionObserver();
@@ -133,6 +133,7 @@ test("it is draggable", async () => {
       })
     )
   ).toBeInTheDocument();
+
   vi.runAllTimers();
 
   expect(screen.getByTestId("grid-animatable")).toHaveStyle({
