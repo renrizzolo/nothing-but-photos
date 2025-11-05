@@ -1,3 +1,6 @@
 .grid-item-anchor {
-  @apply hover:opacity-80 duration-200 transition-all relative outline-none focus:z-10 focus:ring-[rgba(0,0,0,0.66)] focus:ring-offset-2 focus:rounded-sm focus:overflow-hidden focus:ring-offset-white focus:ring-4;
+  @apply hover:opacity-80 focus:opacity-80 duration-200 transition-all outline-none rounded-none relative focus:before:z-10
+  before:inset-0 before:absolute before:opacity-0 before:transition-opacity 
+  before:ring-inset before:ring-2 before:ring-stone-800/50
+  before:outline-stone-100 before:outline-dashed before:-outline-offset-2 focus:overflow-hidden focus:before:opacity-100;
 }

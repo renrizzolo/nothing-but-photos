@@ -8,7 +8,11 @@ const Link = ({
 }: React.PropsWithChildren<{ href: string; onClick?: () => void }>) => (
   <a
     {...rest}
-    className="select-none py-1 inline-flex rounded-sm text-sm transition-colors self-start border-b border-b-transparent hover:text-stone-400 dark:hover:bg-stone-800"
+    className={[
+      "relative select-none leading-none inline-flex rounded-sm text-sm transition-colors self-start",
+      "focus-visible:outline-stone-400 focus-visible:outline-dashed focus-visible:outline-offset-8",
+      "before:block before:-inset-2 before:absolute before:rounded-md before:bg-stone-400 before:opacity-0 before:transition-opacity hover:before:opacity-10 focus-visible:before:opacity-10",
+    ].join(" ")}
   >
     {children}
   </a>
