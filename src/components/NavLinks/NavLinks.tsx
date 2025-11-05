@@ -10,8 +10,8 @@ const Link = ({
     {...rest}
     className={[
       "relative select-none leading-none inline-flex rounded-sm text-sm transition-colors self-start",
-      "focus-visible:outline-stone-400 focus-visible:outline-dashed focus-visible:outline-offset-8",
-      "before:block before:-inset-2 before:absolute before:rounded-md before:bg-stone-400 before:opacity-0 before:transition-opacity hover:before:opacity-10 focus-visible:before:opacity-10",
+      "focus-visible:outline-stone-300 focus-visible:outline-offset-2",
+      "before:block before:-inset-2 before:absolute before:rounded-sm before:bg-stone-400 before:opacity-0 before:transition-opacity hover:before:opacity-10 focus-visible:before:opacity-10",
     ].join(" ")}
   >
     {children}
