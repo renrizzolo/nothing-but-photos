@@ -18,7 +18,6 @@ const args = [
   "--enable-features=SharedArrayBuffer",
   "--hide-scrollbars",
   "--ignore-gpu-blocklist",
-  "--in-process-gpu",
   "--mute-audio",
   "--no-default-browser-check",
   "--no-pings",
@@ -43,6 +42,7 @@ async function main() {
   try {
     // wait for preview server to start
     await new Promise((resolve) => setTimeout(() => resolve(), 1500));
+    console.log("setting up browser");
 
     // Launch Chrome
     const browser = await puppeteer.launch({
@@ -55,9 +55,11 @@ async function main() {
     });
 
     const page = await browser.newPage();
+
     //Allow JS.
     await page.setJavaScriptEnabled(true);
-    page.goto("http://localhost:3000", {
+
+    page.goto("http://localhost:4321", {
       waitUntil: "load",
     });
     // need some extra delay for images to load
@@ -65,13 +67,14 @@ async function main() {
     await new Promise((resolve) => setTimeout(() => resolve(), 3000));
 
     const buffer = await page.screenshot();
+
     fs.writeFileSync(`${imageDir}/og-image.png`, buffer);
     console.log(`wrote ${imageDir}/og-image.png`);
     process.exit(0);
   } catch (error) {
     console.error(error);
     console.log("Something went wrong when generating the og image.");
-    process.exit();
+    process.exit(1);
   }
 }
 
