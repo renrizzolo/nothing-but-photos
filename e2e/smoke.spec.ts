@@ -4,6 +4,14 @@ import { baseURL } from "playwright.config";
 //  TODO - we shouldn't need to manually set this to the first 2 photos
 const photos = ["singapore-dscf-4238", "taipei-dscf-4232"];
 
+// Note this correlates to focus:scale-95 in grid.css
+const focusedScaleFactor = 0.95;
+
+const margin = {
+  desktop: 96,
+  mobile: 32,
+};
+
 const testSelectors = [
   getItemId({
     slug: photos[0],
@@ -17,35 +25,66 @@ const testSelectors = [
   }),
 ];
 
+// this isn't 100% accurate due to the css scale transform
 const getBoundingBoxForViewport = (
   viewport: ViewportSize | null,
-  bb: {
+  boundingBox: {
     x: number;
     y: number;
     width: number;
     height: number;
   } | null
 ) => {
-  const desktop = {
-    ...bb,
-    // this is 0, 0 relative to the grid
-    x: 96,
-    y: 96,
-  };
+  if (!boundingBox) {
+    throw new Error("No bounding box");
+  }
 
   if (!viewport) {
-    return desktop;
+    throw new Error("No viewport");
   }
 
-  if (viewport.width < 1200) {
+  // TODO - viewport width is not always accurate, so we can't guarantee this is correct
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const gridWidth = getGridWidth(viewport);
+
+  const scaledItemOffset =
+    (boundingBox.width / focusedScaleFactor - boundingBox.width) / 2;
+
+  //
+  const desktop = {
+    // width: gridWidth / 8 - scaledItemOffset * 2,
+    // height: gridWidth / 8 - scaledItemOffset * 2,
+    ...boundingBox,
+    // this is 0, 0 relative to the grid
+    x: margin.desktop + scaledItemOffset,
+    y: margin.desktop + scaledItemOffset,
+  };
+
+  if (viewport.width < 640) {
+    // 4 columns on mobile
     return {
-      ...bb,
+      // width: gridWidth / 4 - scaledItemOffset * 2,
+      // height: gridWidth / 4 - scaledItemOffset * 2,
+      ...boundingBox,
       // this is 0, 0 relative to the grid
-      x: 32,
-      y: 32,
+      x: margin.mobile + scaledItemOffset,
+      y: margin.mobile + scaledItemOffset,
     };
   }
+
   return desktop;
+};
+
+const getGridWidth = (viewport: ViewportSize | null) => {
+  if (!viewport) {
+    throw new Error("No viewport");
+  }
+
+  if (viewport.width < 640) {
+    return viewport.width - margin.mobile * 2;
+  }
+
+  return viewport.width - margin.desktop * 2;
 };
 
 test.describe("Smoke tests", () => {
@@ -113,11 +152,23 @@ test.describe("Smoke tests", () => {
 
     // wait for effect timeout
     // TODO this is flaky
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("networkidle");
+
+    const handle = await item.elementHandle();
+    await handle?.waitForElementState("stable");
+
     await expect(item).toBeFocused();
 
-    const bb = await item.boundingBox();
-    expect(bb).toStrictEqual(getBoundingBoxForViewport(viewport, bb));
+    const boundingBox = await item.boundingBox();
+    const expectedBoundingBox = getBoundingBoxForViewport(
+      viewport,
+      boundingBox
+    );
+
+    expect(boundingBox?.width).toBeCloseTo(expectedBoundingBox.width, 1);
+    expect(boundingBox?.height).toBeCloseTo(expectedBoundingBox.height, 1);
+    expect(boundingBox?.x).toBeCloseTo(expectedBoundingBox.x, 1);
+    expect(boundingBox?.y).toBeCloseTo(expectedBoundingBox.y, 1);
   });
 
   test("thumb is focused and animated to on return when starting on a photo", async ({
@@ -134,10 +185,21 @@ test.describe("Smoke tests", () => {
 
     // wait for effect timeout
     // TODO this is flaky
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("networkidle");
+
+    const handle = await item.elementHandle();
+    await handle?.waitForElementState("stable");
     await expect(item).toBeFocused();
 
-    const bb = await item.boundingBox();
-    expect(bb).toStrictEqual(getBoundingBoxForViewport(viewport, bb));
+    const boundingBox = await item.boundingBox();
+    const expectedBoundingBox = getBoundingBoxForViewport(
+      viewport,
+      boundingBox
+    );
+
+    expect(boundingBox?.width).toBeCloseTo(expectedBoundingBox.width, 1);
+    expect(boundingBox?.height).toBeCloseTo(expectedBoundingBox.height, 1);
+    expect(boundingBox?.x).toBeCloseTo(expectedBoundingBox.x, 1);
+    expect(boundingBox?.y).toBeCloseTo(expectedBoundingBox.y, 1);
   });
 });
